@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useState, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import {
@@ -40,8 +40,21 @@ interface ProductData {
 }
 
 export default function NewOrderPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      }
+    >
+      <NewOrderPageContent />
+    </Suspense>
+  );
+}
+
+function NewOrderPageContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const { data: session } = useSession();
   const productId = searchParams.get("product");
 
