@@ -25,10 +25,12 @@ export default function CustomerLayout({
   return (
     <div className="min-h-screen bg-background">
       {/* Top navigation bar */}
-      <header className="sticky top-0 z-50 h-14 border-b border-border bg-white flex items-center px-6 gap-6">
+      <header className="sticky top-0 z-50 h-16 border-b border-white/40 glass flex items-center px-6 gap-6">
         {/* Logo */}
-        <Link href="/catalog" className="flex items-center gap-2 shrink-0">
-          <Warehouse className="h-5 w-5 text-neon" strokeWidth={1.5} />
+        <Link href="/catalog" className="flex items-center gap-2.5 shrink-0">
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-sm">
+            <Warehouse className="h-4 w-4 text-white" strokeWidth={2} />
+          </div>
           <span className="text-[15px] font-semibold tracking-tight">
             GoDown
           </span>
@@ -39,9 +41,9 @@ export default function CustomerLayout({
           <Link
             href="/catalog"
             className={cn(
-              "flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium transition-colors rounded-md",
+              "flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium transition-all duration-200 rounded-full",
               pathname === "/catalog"
-                ? "bg-foreground text-background"
+                ? "bg-foreground text-background shadow-sm"
                 : "text-muted-foreground hover:text-foreground hover:bg-secondary"
             )}
           >
@@ -51,9 +53,9 @@ export default function CustomerLayout({
           <Link
             href="/catalog/orders"
             className={cn(
-              "flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium transition-colors rounded-md",
+              "flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium transition-all duration-200 rounded-full",
               pathname.startsWith("/catalog/orders")
-                ? "bg-foreground text-background"
+                ? "bg-foreground text-background shadow-sm"
                 : "text-muted-foreground hover:text-foreground hover:bg-secondary"
             )}
           >
@@ -68,7 +70,7 @@ export default function CustomerLayout({
         {/* User */}
         {session?.user && (
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-secondary rounded-md">
+            <div className="flex items-center gap-2 px-3.5 py-2 bg-secondary/60 rounded-full">
               <User className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.5} />
               <span className="text-[12px] font-medium">
                 {session.user.name}
@@ -76,7 +78,7 @@ export default function CustomerLayout({
             </div>
             <button
               onClick={() => signOut({ callbackUrl: "/auth/login" })}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 text-[12px] text-muted-foreground hover:text-foreground rounded-full hover:bg-secondary/60 transition-all duration-200"
             >
               <LogOut className="h-3.5 w-3.5" strokeWidth={1.5} />
               Sign Out

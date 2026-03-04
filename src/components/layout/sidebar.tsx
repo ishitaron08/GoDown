@@ -64,60 +64,69 @@ export function Sidebar() {
   );
 
   return (
-    <aside className="w-[240px] min-h-screen bg-sidebar flex flex-col border-r border-sidebar-border shrink-0">
+    <aside className="w-[260px] min-h-screen bg-sidebar flex flex-col border-r border-sidebar-border shrink-0">
       {/* Logo */}
-      <div className="h-14 flex items-center px-6 border-b border-sidebar-border">
-        <div className="flex items-center gap-2.5">
-          <Warehouse className="h-[18px] w-[18px] text-neon" strokeWidth={1.5} />
-          <span className="text-[15px] font-semibold tracking-tight text-white">
-            GoDown
-          </span>
+      <div className="h-16 flex items-center px-6 border-b border-sidebar-border">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-lg shadow-teal-500/20">
+            <Warehouse className="h-4 w-4 text-white" strokeWidth={2} />
+          </div>
+          <div>
+            <span className="text-[15px] font-semibold tracking-tight text-white">
+              GoDown
+            </span>
+            <p className="text-[10px] text-sidebar-foreground/60 leading-none">Inventory</p>
+          </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 pt-6 pb-4">
-        <p className="px-3 mb-3 text-[10px] font-medium uppercase tracking-[0.12em] text-sidebar-foreground">
-          Navigation
-        </p>
-        <div className="space-y-px">
-          {visibleNav.map(({ href, label, icon: Icon }) => {
-            const active =
-              pathname === href || pathname.startsWith(href + "/");
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2 text-[13px] font-medium transition-all duration-150 border-l-2",
-                  active
-                    ? "border-neon bg-sidebar-accent text-white"
-                    : "border-transparent text-sidebar-foreground hover:text-white hover:bg-white/[0.04]"
-                )}
-              >
-                <Icon
+      <nav className="flex-1 px-3 pt-6 pb-4 space-y-6">
+        <div>
+          <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/60">
+            Navigation
+          </p>
+          <div className="space-y-1">
+            {visibleNav.map(({ href, label, icon: Icon }) => {
+              const active =
+                pathname === href || pathname.startsWith(href + "/");
+              return (
+                <Link
+                  key={href}
+                  href={href}
                   className={cn(
-                    "h-4 w-4 shrink-0",
+                    "flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium rounded-lg transition-all duration-200",
                     active
-                      ? "text-white"
-                      : "text-sidebar-foreground"
+                      ? "bg-gradient-to-r from-teal-500/20 to-teal-500/5 text-white shadow-sm shadow-teal-500/10"
+                      : "text-sidebar-foreground hover:text-white hover:bg-white/[0.06]"
                   )}
-                  strokeWidth={1.5}
-                />
-                {label}
-              </Link>
-            );
-          })}
+                >
+                  <Icon
+                    className={cn(
+                      "h-4 w-4 shrink-0 transition-colors",
+                      active
+                        ? "text-teal-400"
+                        : "text-sidebar-foreground"
+                    )}
+                    strokeWidth={1.5}
+                  />
+                  {label}
+                  {active && (
+                    <span className="ml-auto h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse-ring" />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
         {/* GoDown section */}
         {visibleGodown.length > 0 && (
-          <>
-            <div className="my-5 border-t border-sidebar-border" />
-            <p className="px-3 mb-3 text-[10px] font-medium uppercase tracking-[0.12em] text-sidebar-foreground">
+          <div>
+            <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/60">
               GoDown
             </p>
-            <div className="space-y-px">
+            <div className="space-y-1">
               {visibleGodown.map(({ href, label, icon: Icon }) => {
                 const active =
                   href === "/warehouses"
@@ -128,89 +137,98 @@ export function Sidebar() {
                     key={href}
                     href={href}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2 text-[13px] font-medium transition-all duration-150 border-l-2",
+                      "flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium rounded-lg transition-all duration-200",
                       active
-                        ? "border-neon bg-sidebar-accent text-white"
-                        : "border-transparent text-sidebar-foreground hover:text-white hover:bg-white/[0.04]"
+                        ? "bg-gradient-to-r from-teal-500/20 to-teal-500/5 text-white shadow-sm shadow-teal-500/10"
+                        : "text-sidebar-foreground hover:text-white hover:bg-white/[0.06]"
                     )}
                   >
                     <Icon
                       className={cn(
-                        "h-4 w-4 shrink-0",
-                        active ? "text-white" : "text-sidebar-foreground"
+                        "h-4 w-4 shrink-0 transition-colors",
+                        active ? "text-teal-400" : "text-sidebar-foreground"
                       )}
                       strokeWidth={1.5}
                     />
                     {label}
+                    {active && (
+                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse-ring" />
+                    )}
                   </Link>
                 );
               })}
             </div>
-          </>
+          </div>
         )}
 
-        {/* Admin section — shown if user has any admin-level permissions */}
+        {/* Admin section */}
         {visibleAdmin.length > 0 && (
-          <>
-            <div className="my-5 border-t border-sidebar-border" />
-            <p className="px-3 mb-3 text-[10px] font-medium uppercase tracking-[0.12em] text-sidebar-foreground">
+          <div>
+            <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-sidebar-foreground/60">
               Admin
             </p>
-            {visibleAdmin.map(({ href, label, icon: Icon }) => {
-              const active =
-                href === "/settings"
-                  ? pathname === "/settings"
-                  : pathname === href || pathname.startsWith(href + "/");
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 text-[13px] font-medium transition-all duration-150 border-l-2",
-                    active
-                      ? "border-neon bg-sidebar-accent text-white"
-                      : "border-transparent text-sidebar-foreground hover:text-white hover:bg-white/[0.04]"
-                  )}
-                >
-                  <Icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
-                  {label}
-                </Link>
-              );
-            })}
-          </>
+            <div className="space-y-1">
+              {visibleAdmin.map(({ href, label, icon: Icon }) => {
+                const active =
+                  href === "/settings"
+                    ? pathname === "/settings"
+                    : pathname === href || pathname.startsWith(href + "/");
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium rounded-lg transition-all duration-200",
+                      active
+                        ? "bg-gradient-to-r from-teal-500/20 to-teal-500/5 text-white shadow-sm shadow-teal-500/10"
+                        : "text-sidebar-foreground hover:text-white hover:bg-white/[0.06]"
+                    )}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                    {label}
+                    {active && (
+                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse-ring" />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         )}
+
         {/* Quick Links */}
-        <div className="my-5 border-t border-sidebar-border" />
-        <a
-          href="/track"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-3 px-3 py-2 text-[13px] font-medium transition-all duration-150 border-l-2 border-transparent text-sidebar-foreground hover:text-white hover:bg-white/[0.04]"
-        >
-          <MapPin className="h-4 w-4 shrink-0" strokeWidth={1.5} />
-          Track Order
-          <svg className="h-3 w-3 ml-auto opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
-        </a>
+        <div>
+          <a
+            href="/track"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium rounded-lg text-sidebar-foreground hover:text-white hover:bg-white/[0.06] transition-all duration-200"
+          >
+            <MapPin className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+            Track Order
+            <svg className="h-3 w-3 ml-auto opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+          </a>
+        </div>
       </nav>
 
       {/* User capsule */}
       <div className="px-3 py-4 border-t border-sidebar-border">
-        <div className="flex items-center gap-3 px-3 py-2.5 bg-white/[0.04]">
-          <div className="h-7 w-7 flex items-center justify-center bg-white/10 text-white text-[11px] font-medium shrink-0">
+        <div className="flex items-center gap-3 px-3 py-3 bg-white/[0.04] rounded-xl">
+          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center text-white text-[12px] font-semibold shrink-0 shadow-sm">
             {session?.user?.name?.[0]?.toUpperCase() ?? "U"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[12px] font-medium text-white truncate">
+            <p className="text-[13px] font-medium text-white truncate">
               {session?.user?.name}
             </p>
-            <p className="text-[10px] text-sidebar-foreground uppercase tracking-wider">
+            <p className="text-[10px] text-sidebar-foreground capitalize leading-tight">
               {session?.user?.role}
             </p>
           </div>
         </div>
         <button
           onClick={() => signOut({ callbackUrl: "/auth/login" })}
-          className="mt-1.5 w-full flex items-center gap-3 px-3 py-1.5 text-[12px] font-medium text-sidebar-foreground hover:text-white transition-colors"
+          className="mt-2 w-full flex items-center justify-center gap-2 px-3 py-2 text-[12px] font-medium text-sidebar-foreground hover:text-white hover:bg-white/[0.06] rounded-lg transition-all duration-200"
         >
           <LogOut className="h-3.5 w-3.5" strokeWidth={1.5} />
           Sign Out

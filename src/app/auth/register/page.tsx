@@ -18,9 +18,9 @@ const RegisterSchema = z.object({
 type RegisterForm = z.infer<typeof RegisterSchema>;
 
 const labelCls =
-  "block text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mb-1.5";
+  "block text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground mb-2";
 const inputCls =
-  "w-full px-4 py-2.5 border border-border bg-white text-[13px] placeholder:text-muted-foreground/40 focus:outline-none focus:border-foreground/20 transition-colors";
+  "w-full px-4 py-3 border border-border bg-white text-[13px] rounded-lg placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-foreground/20 transition-all";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -51,14 +51,13 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-secondary">
-      <div className="w-full max-w-md p-10 bg-white border border-black/[0.06] animate-scale-in">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-teal-50/30">
+      <div className="w-full max-w-md p-10 bg-white border border-border rounded-2xl shadow-xl animate-scale-in">
         {/* Logo */}
-        <div className="flex items-center justify-center gap-2.5 mb-10">
-          <Warehouse
-            className="h-5 w-5 text-neon"
-            strokeWidth={1.5}
-          />
+        <div className="flex items-center justify-center gap-3 mb-10">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-lg shadow-teal-500/20">
+            <Warehouse className="h-5 w-5 text-white" strokeWidth={2} />
+          </div>
           <div>
             <h1 className="text-lg font-semibold tracking-tight">GoDown</h1>
             <p className="text-[10px] text-muted-foreground uppercase tracking-[0.15em]">
@@ -67,7 +66,7 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <h2 className="text-[14px] font-semibold text-center mb-8">
+        <h2 className="text-[15px] font-semibold text-center mb-8">
           Create an account
         </h2>
 
@@ -111,7 +110,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 bg-foreground text-background text-[13px] font-medium hover:bg-foreground/90 disabled:opacity-50 transition-colors flex items-center justify-center gap-2 btn-press"
+            className="w-full py-3 bg-foreground text-background text-[13px] font-medium rounded-lg hover:bg-foreground/90 disabled:opacity-50 transition-all shadow-sm flex items-center justify-center gap-2 btn-press"
           >
             {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             {loading ? "Creating..." : "Create Account"}

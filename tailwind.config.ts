@@ -69,9 +69,12 @@ const config: Config = {
       },
       animation: {
         "fade-in": "fadeIn 0.4s ease-out both",
-        "slide-up": "slideUp 0.35s ease-out both",
-        "slide-down": "slideDown 0.35s ease-out both",
-        "scale-in": "scaleIn 0.3s ease-out both",
+        "slide-up": "slideUp 0.4s cubic-bezier(0.33, 1, 0.68, 1) both",
+        "slide-down": "slideDown 0.4s cubic-bezier(0.33, 1, 0.68, 1) both",
+        "scale-in": "scaleIn 0.35s cubic-bezier(0.33, 1, 0.68, 1) both",
+        "slide-in-right": "slideInRight 0.4s cubic-bezier(0.33, 1, 0.68, 1) both",
+        "bounce-in": "bounceIn 0.5s ease both",
+        "pulse-ring": "pulseRing 1.5s ease infinite",
       },
       keyframes: {
         fadeIn: {
@@ -79,16 +82,31 @@ const config: Config = {
           to: { opacity: "1" },
         },
         slideUp: {
-          from: { opacity: "0", transform: "translateY(8px)" },
+          from: { opacity: "0", transform: "translateY(10px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
         slideDown: {
-          from: { opacity: "0", transform: "translateY(-8px)" },
+          from: { opacity: "0", transform: "translateY(-10px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
         scaleIn: {
-          from: { opacity: "0", transform: "scale(0.96)" },
+          from: { opacity: "0", transform: "scale(0.95)" },
           to: { opacity: "1", transform: "scale(1)" },
+        },
+        slideInRight: {
+          from: { opacity: "0", transform: "translateX(16px)" },
+          to: { opacity: "1", transform: "translateX(0)" },
+        },
+        bounceIn: {
+          "0%": { opacity: "0", transform: "scale(0.3)" },
+          "50%": { opacity: "1", transform: "scale(1.05)" },
+          "70%": { transform: "scale(0.97)" },
+          "100%": { transform: "scale(1)" },
+        },
+        pulseRing: {
+          "0%": { boxShadow: "0 0 0 0 hsl(var(--neon) / 0.4)" },
+          "70%": { boxShadow: "0 0 0 8px hsl(var(--neon) / 0)" },
+          "100%": { boxShadow: "0 0 0 0 hsl(var(--neon) / 0)" },
         },
       },
     },

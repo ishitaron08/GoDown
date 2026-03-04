@@ -26,41 +26,46 @@ export function TopBar() {
     "GoDown";
 
   return (
-    <header className="sticky top-0 z-30 h-14 flex items-center justify-between px-8 bg-white/80 backdrop-blur-xl border-b border-black/[0.06]">
+    <header className="sticky top-0 z-30 h-16 flex items-center justify-between px-8 glass border-b border-white/40">
       {/* Title */}
-      <h1 className="text-[15px] font-semibold tracking-tight text-foreground">
-        {title}
-      </h1>
+      <div>
+        <h1 className="text-[16px] font-semibold tracking-tight text-foreground">
+          {title}
+        </h1>
+        <p className="text-[11px] text-muted-foreground leading-none mt-0.5">
+          {session?.user?.name ? `Welcome back, ${session.user.name.split(' ')[0]}` : 'GoDown'}
+        </p>
+      </div>
 
       {/* Search */}
       <div className="flex-1 max-w-md mx-8">
         <div className="relative">
           <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground"
             strokeWidth={1.5}
           />
           <input
             type="text"
-            placeholder="Search..."
-            className="w-full h-8 pl-9 pr-12 text-[13px] bg-secondary/60 border border-transparent placeholder:text-muted-foreground/50 focus:outline-none focus:border-border focus:bg-white transition-all"
+            placeholder="Search anything..."
+            className="w-full h-9 pl-10 pr-14 text-[13px] bg-white/60 border border-border/50 rounded-full placeholder:text-muted-foreground/50 focus:outline-none focus:border-border focus:bg-white focus:shadow-sm transition-all"
           />
-          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex h-5 items-center px-1.5 text-[10px] font-mono text-muted-foreground/60 border border-border/60">
+          <kbd className="absolute right-3.5 top-1/2 -translate-y-1/2 hidden sm:inline-flex h-5 items-center px-1.5 text-[10px] font-mono text-muted-foreground/60 bg-white/80 border border-border/40 rounded">
             ⌘K
           </kbd>
         </div>
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-1">
-        <button className="relative h-8 w-8 flex items-center justify-center hover:bg-secondary transition-colors">
+      <div className="flex items-center gap-2">
+        <button className="relative h-9 w-9 flex items-center justify-center hover:bg-white/60 rounded-full transition-all duration-200">
           <Bell className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
-          <span className="absolute top-1 right-1 h-1.5 w-1.5 bg-neon rounded-full" />
+          <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-teal-500 rounded-full ring-2 ring-white" />
         </button>
 
-        <div className="h-5 w-px bg-border mx-2" />
+        <div className="h-6 w-px bg-border/50 mx-1" />
 
-        <div className="flex items-center gap-2.5 px-2 py-1 hover:bg-secondary transition-colors cursor-default">
-          <div className="h-7 w-7 flex items-center justify-center bg-foreground text-background text-[11px] font-medium">
+        <div className="flex items-center gap-2.5 px-2.5 py-1.5 hover:bg-white/60 rounded-xl transition-all duration-200 cursor-default">
+          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-foreground to-foreground/70 flex items-center justify-center text-background text-[12px] font-semibold shadow-sm">
             {session?.user?.name?.[0]?.toUpperCase() ?? "U"}
           </div>
           <div className="hidden sm:block">

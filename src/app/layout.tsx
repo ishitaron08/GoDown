@@ -27,12 +27,13 @@ export default function RootLayout({
           <Toaster
             toastOptions={{
               style: {
-                background: "hsl(0 0% 3.9%)",
-                color: "hsl(0 0% 98%)",
-                border: "1px solid hsl(0 0% 14.9%)",
-                borderRadius: "0",
+                background: "hsl(222 47% 11%)",
+                color: "hsl(210 40% 98%)",
+                border: "1px solid hsl(222 30% 18%)",
+                borderRadius: "12px",
                 fontSize: "13px",
                 fontWeight: "400",
+                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.15)",
               },
             }}
             position="bottom-right"
