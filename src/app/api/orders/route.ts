@@ -24,6 +24,10 @@ const CreateOrderSchema = z.object({
   items: z.array(OrderItemSchema).min(1),
   totalAmount: z.number().min(0),
   notes: z.string().optional(),
+  customerName: z.string().optional(),
+  customerPhone: z.string().optional(),
+  customerAddress: z.string().optional(),
+  customerPincode: z.string().optional(),
 });
 
 export async function GET(req: NextRequest) {
