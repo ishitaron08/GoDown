@@ -83,9 +83,34 @@ async function getPermissionsForRole(roleSlug: string): Promise<string[]> {
   return fallback;
 }
 
+// Determine the canonical app URL — works in dev and on Vercel
+const appUrl =
+  process.env.NEXTAUTH_URL && !process.env.NEXTAUTH_URL.includes("localhost")
+    ? process.env.NEXTAUTH_URL
+    : process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+
+const isProd = appUrl.startsWith("https://");
+
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 }, // 30 days
   secret: process.env.NEXTAUTH_SECRET,
+  // Ensure secure cookies on HTTPS (Vercel) and plain cookies in dev
+  useSecureCookies: isProd,
+  cookies: isProd
+    ? {
+        sessionToken: {
+          name: "__Secure-next-auth.session-token",
+          options: {
+            httpOnly: true,
+            sameSite: "lax",
+            path: "/",
+            secure: true,
+          },
+        },
+      }
+    : undefined,
   providers: [
     CredentialsProvider({
       name: "Credentials",
