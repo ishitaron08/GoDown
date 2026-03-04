@@ -1,0 +1,358 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// MULTI-TENANT
+// ============================================================================
+
+model Tenant {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  subdomain String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users          User[]
+  vendors        Vendor[]
+  products       Product[]
+  services       Service[]
+  consumers      Consumer[]
+  orders         Order[]
+  purchaseOrders PurchaseOrder[]
+  roles          Role[]
+  salesHistory   SalesHistory[]
+  aiPredictions  AiPrediction[]
+}
+
+// ============================================================================
+// AUTH & RBAC (Dynamic - No Hardcoded Roles)
+// ============================================================================
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  password  String
+  name      String?
+  tenantId  String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userRoles     UserRole[]
+  createdPOs    PurchaseOrder[] @relation("POCreatedBy")
+  approvedPOs   PurchaseOrder[] @relation("POApprovedBy")
+  refreshTokens RefreshToken[]
+
+  @@index([tenantId])
+}
+
+model Role {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  tenantId    String   @db.ObjectId
+  createdAt   DateTime @default(now())
+
+  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  rolePermissions RolePermission[]
+  userRoles       UserRole[]
+
+  @@unique([name, tenantId])
+  @@index([tenantId])
+}
+
+model Permission {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  action      String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+
+  rolePermissions RolePermission[]
+}
+
+model RolePermission {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  roleId       String @db.ObjectId
+  permissionId String @db.ObjectId
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}
+
+model UserRole {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  roleId String @db.ObjectId
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+}
+
+model RefreshToken {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  token     String   @unique
+  userId    String   @db.ObjectId
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ============================================================================
+// VENDORS
+// ============================================================================
+
+enum VendorStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+model Vendor {
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  email      String?
+  phone      String?
+  address    String?
+  status     VendorStatus @default(ACTIVE)
+  riskScore  Float        @default(0)
+  documents  Json?
+  tenantId   String       @db.ObjectId
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  products       Product[]
+  services       Service[]
+  purchaseOrders PurchaseOrder[]
+
+  @@index([tenantId, status])
+  @@index([tenantId])
+}
+
+// ============================================================================
+// PRODUCTS
+// ============================================================================
+
+model Product {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  sku              String   @unique
+  description      String?
+  costPrice        Float
+  sellingPrice     Float
+  stockQuantity    Int      @default(0)
+  reorderThreshold Int      @default(10)
+  vendorId         String   @db.ObjectId
+  tenantId         String   @db.ObjectId
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  vendor             Vendor              @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  tenant             Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orderItems         OrderItem[]
+  purchaseOrderItems PurchaseOrderItem[]
+  salesHistory       SalesHistory[]
+  aiPredictions      AiPrediction[]
+
+  @@index([tenantId, vendorId])
+  @@index([tenantId])
+}
+
+// ============================================================================
+// SERVICES
+// ============================================================================
+
+enum PricingModel {
+  FIXED
+  HOURLY
+  SUBSCRIPTION
+}
+
+model Service {
+  id                 String       @id @default(auto()) @map("_id") @db.ObjectId
+  name               String
+  description        String?
+  pricingModel       PricingModel @default(FIXED)
+  basePrice          Float
+  vendorId           String       @db.ObjectId
+  availabilityStatus Boolean      @default(true)
+  tenantId           String       @db.ObjectId
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  vendor     Vendor      @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+
+  @@index([tenantId, vendorId])
+  @@index([tenantId])
+}
+
+// ============================================================================
+// CONSUMERS
+// ============================================================================
+
+model Consumer {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String
+  phone     String?
+  address   String?
+  segment   String?
+  tenantId  String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@unique([email, tenantId])
+  @@index([tenantId, segment])
+  @@index([tenantId])
+}
+
+// ============================================================================
+// ORDERS
+// ============================================================================
+
+enum OrderType {
+  PRODUCT
+  SERVICE
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model Order {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  consumerId  String      @db.ObjectId
+  totalAmount Float
+  type        OrderType
+  status      OrderStatus @default(PENDING)
+  tenantId    String      @db.ObjectId
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  consumer   Consumer    @relation(fields: [consumerId], references: [id], onDelete: Cascade)
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, type])
+  @@index([consumerId])
+}
+
+model OrderItem {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  orderId   String  @db.ObjectId
+  productId String? @db.ObjectId
+  serviceId String? @db.ObjectId
+  quantity  Int
+  unitPrice Float
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
+  service Service? @relation(fields: [serviceId], references: [id])
+
+  @@index([orderId])
+}
+
+// ============================================================================
+// PURCHASE ORDERS (SAP-Inspired Approval Workflow)
+// ============================================================================
+
+enum PurchaseOrderStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  FULFILLED
+}
+
+model PurchaseOrder {
+  id           String              @id @default(auto()) @map("_id") @db.ObjectId
+  vendorId     String              @db.ObjectId
+  status       PurchaseOrderStatus @default(PENDING)
+  totalAmount  Float
+  notes        String?
+  createdById  String              @db.ObjectId
+  approvedById String?             @db.ObjectId
+  tenantId     String              @db.ObjectId
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  vendor     Vendor              @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  createdBy  User                @relation("POCreatedBy", fields: [createdById], references: [id])
+  approvedBy User?               @relation("POApprovedBy", fields: [approvedById], references: [id])
+  tenant     Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items      PurchaseOrderItem[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+  @@index([vendorId])
+}
+
+model PurchaseOrderItem {
+  id              String @id @default(auto()) @map("_id") @db.ObjectId
+  purchaseOrderId String @db.ObjectId
+  productId       String @db.ObjectId
+  quantity        Int
+  unitPrice       Float
+
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([purchaseOrderId])
+}
+
+// ============================================================================
+// AI & ANALYTICS
+// ============================================================================
+
+model SalesHistory {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId    String   @db.ObjectId
+  quantitySold Int
+  revenue      Float
+  date         DateTime
+  tenantId     String   @db.ObjectId
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([productId, date])
+  @@index([tenantId, date])
+}
+
+model AiPrediction {
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId           String   @db.ObjectId
+  daysUntilStockout   Int?
+  recommendedQuantity Int?
+  confidence          Float?
+  reasoning           String?
+  tenantId            String   @db.ObjectId
+  createdAt           DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([tenantId])
+}
