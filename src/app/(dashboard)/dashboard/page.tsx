@@ -77,8 +77,8 @@ function StatCard({
             <p className="text-[12px] text-muted-foreground">{subtitle}</p>
           )}
         </div>
-        <div className="h-10 w-10 flex items-center justify-center bg-secondary/80 rounded-xl">
-          <Icon className="h-[18px] w-[18px] text-foreground/60" strokeWidth={1.5} />
+        <div className="h-10 w-10 flex items-center justify-center rounded-xl" style={{ background: 'hsl(var(--neon) / 0.08)' }}>
+          <Icon className="h-[18px] w-[18px]" style={{ color: 'hsl(var(--neon))' }} strokeWidth={1.5} />
         </div>
       </div>
     </div>

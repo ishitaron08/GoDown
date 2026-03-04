@@ -20,7 +20,7 @@ type RegisterForm = z.infer<typeof RegisterSchema>;
 const labelCls =
   "block text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground mb-2";
 const inputCls =
-  "w-full px-4 py-3 border border-border bg-white text-[13px] rounded-lg placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-foreground/20 transition-all";
+  "w-full px-4 py-3 border border-white/50 bg-white/50 backdrop-blur-sm text-[13px] rounded-lg placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-white/70 focus:bg-white/70 transition-all";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -51,11 +51,11 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-teal-50/30">
-      <div className="w-full max-w-md p-10 bg-white border border-border rounded-2xl shadow-xl animate-scale-in">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50/80 via-white to-teal-50/40">
+      <div className="w-full max-w-md p-10 bg-white/70 backdrop-blur-xl border border-white/60 rounded-2xl shadow-xl animate-scale-in">
         {/* Logo */}
         <div className="flex items-center justify-center gap-3 mb-10">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-lg shadow-teal-500/20">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-lg" style={{ boxShadow: '0 8px 20px -4px rgba(13, 148, 136, 0.3)' }}>
             <Warehouse className="h-5 w-5 text-white" strokeWidth={2} />
           </div>
           <div>

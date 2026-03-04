@@ -68,7 +68,7 @@ export function Sidebar() {
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-lg shadow-teal-500/20">
+          <div className="h-8 w-8 rounded-lg flex items-center justify-center shadow-lg" style={{ background: 'var(--role-gradient)', boxShadow: '0 4px 12px -2px hsl(var(--neon) / 0.35)' }}>
             <Warehouse className="h-4 w-4 text-white" strokeWidth={2} />
           </div>
           <div>
@@ -97,22 +97,24 @@ export function Sidebar() {
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium rounded-lg transition-all duration-200",
                     active
-                      ? "bg-gradient-to-r from-teal-500/20 to-teal-500/5 text-white shadow-sm shadow-teal-500/10"
+                      ? "text-white"
                       : "text-sidebar-foreground hover:text-white hover:bg-white/[0.06]"
                   )}
+                  style={active ? { background: 'linear-gradient(to right, hsl(var(--neon) / 0.2), hsl(var(--neon) / 0.05))', boxShadow: '0 1px 3px hsl(var(--neon) / 0.1)' } : undefined}
                 >
                   <Icon
                     className={cn(
                       "h-4 w-4 shrink-0 transition-colors",
                       active
-                        ? "text-teal-400"
+                        ? ""
                         : "text-sidebar-foreground"
                     )}
+                    style={active ? { color: 'hsl(var(--neon))' } : undefined}
                     strokeWidth={1.5}
                   />
                   {label}
                   {active && (
-                    <span className="ml-auto h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse-ring" />
+                    <span className="ml-auto h-1.5 w-1.5 rounded-full animate-pulse-ring" style={{ background: 'hsl(var(--neon))' }} />
                   )}
                 </Link>
               );
@@ -139,20 +141,22 @@ export function Sidebar() {
                     className={cn(
                       "flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium rounded-lg transition-all duration-200",
                       active
-                        ? "bg-gradient-to-r from-teal-500/20 to-teal-500/5 text-white shadow-sm shadow-teal-500/10"
+                        ? "text-white"
                         : "text-sidebar-foreground hover:text-white hover:bg-white/[0.06]"
                     )}
+                    style={active ? { background: 'linear-gradient(to right, hsl(var(--neon) / 0.2), hsl(var(--neon) / 0.05))', boxShadow: '0 1px 3px hsl(var(--neon) / 0.1)' } : undefined}
                   >
                     <Icon
                       className={cn(
                         "h-4 w-4 shrink-0 transition-colors",
-                        active ? "text-teal-400" : "text-sidebar-foreground"
+                        active ? "" : "text-sidebar-foreground"
                       )}
+                      style={active ? { color: 'hsl(var(--neon))' } : undefined}
                       strokeWidth={1.5}
                     />
                     {label}
                     {active && (
-                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse-ring" />
+                      <span className="ml-auto h-1.5 w-1.5 rounded-full animate-pulse-ring" style={{ background: 'hsl(var(--neon))' }} />
                     )}
                   </Link>
                 );
@@ -180,14 +184,15 @@ export function Sidebar() {
                     className={cn(
                       "flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium rounded-lg transition-all duration-200",
                       active
-                        ? "bg-gradient-to-r from-teal-500/20 to-teal-500/5 text-white shadow-sm shadow-teal-500/10"
+                        ? "text-white"
                         : "text-sidebar-foreground hover:text-white hover:bg-white/[0.06]"
                     )}
+                    style={active ? { background: 'linear-gradient(to right, hsl(var(--neon) / 0.2), hsl(var(--neon) / 0.05))', boxShadow: '0 1px 3px hsl(var(--neon) / 0.1)' } : undefined}
                   >
                     <Icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
                     {label}
                     {active && (
-                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse-ring" />
+                      <span className="ml-auto h-1.5 w-1.5 rounded-full animate-pulse-ring" style={{ background: 'hsl(var(--neon))' }} />
                     )}
                   </Link>
                 );
@@ -214,7 +219,7 @@ export function Sidebar() {
       {/* User capsule */}
       <div className="px-3 py-4 border-t border-sidebar-border">
         <div className="flex items-center gap-3 px-3 py-3 bg-white/[0.04] rounded-xl">
-          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-teal-400 to-emerald-600 flex items-center justify-center text-white text-[12px] font-semibold shrink-0 shadow-sm">
+          <div className="h-8 w-8 rounded-full flex items-center justify-center text-white text-[12px] font-semibold shrink-0 shadow-sm" style={{ background: 'var(--role-gradient)' }}>
             {session?.user?.name?.[0]?.toUpperCase() ?? "U"}
           </div>
           <div className="flex-1 min-w-0">

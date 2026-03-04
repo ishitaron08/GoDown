@@ -13,6 +13,7 @@ import {
   User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RoleTheme } from "@/components/role-theme";
 
 export default function CustomerLayout({
   children,
@@ -23,12 +24,13 @@ export default function CustomerLayout({
   const pathname = usePathname();
 
   return (
+    <RoleTheme>
     <div className="min-h-screen bg-background">
       {/* Top navigation bar */}
       <header className="sticky top-0 z-50 h-16 border-b border-white/40 glass flex items-center px-6 gap-6">
         {/* Logo */}
         <Link href="/catalog" className="flex items-center gap-2.5 shrink-0">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-sm">
+          <div className="h-8 w-8 rounded-lg flex items-center justify-center shadow-sm" style={{ background: 'var(--role-gradient)' }}>
             <Warehouse className="h-4 w-4 text-white" strokeWidth={2} />
           </div>
           <span className="text-[15px] font-semibold tracking-tight">
@@ -43,9 +45,10 @@ export default function CustomerLayout({
             className={cn(
               "flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium transition-all duration-200 rounded-full",
               pathname === "/catalog"
-                ? "bg-foreground text-background shadow-sm"
-                : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                ? "text-white shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-white/40"
             )}
+            style={pathname === "/catalog" ? { background: 'hsl(var(--neon))' } : undefined}
           >
             <Package className="h-3.5 w-3.5" strokeWidth={1.5} />
             Products
@@ -55,9 +58,10 @@ export default function CustomerLayout({
             className={cn(
               "flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium transition-all duration-200 rounded-full",
               pathname.startsWith("/catalog/orders")
-                ? "bg-foreground text-background shadow-sm"
-                : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                ? "text-white shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-white/40"
             )}
+            style={pathname.startsWith("/catalog/orders") ? { background: 'hsl(var(--neon))' } : undefined}
           >
             <ClipboardList className="h-3.5 w-3.5" strokeWidth={1.5} />
             My Orders
@@ -70,7 +74,7 @@ export default function CustomerLayout({
         {/* User */}
         {session?.user && (
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3.5 py-2 bg-secondary/60 rounded-full">
+            <div className="flex items-center gap-2 px-3.5 py-2 bg-white/40 backdrop-blur-sm border border-white/40 rounded-full">
               <User className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.5} />
               <span className="text-[12px] font-medium">
                 {session.user.name}
@@ -78,7 +82,7 @@ export default function CustomerLayout({
             </div>
             <button
               onClick={() => signOut({ callbackUrl: "/auth/login" })}
-              className="flex items-center gap-1.5 px-3 py-2 text-[12px] text-muted-foreground hover:text-foreground rounded-full hover:bg-secondary/60 transition-all duration-200"
+              className="flex items-center gap-1.5 px-3 py-2 text-[12px] text-muted-foreground hover:text-foreground rounded-full hover:bg-white/40 transition-all duration-200"
             >
               <LogOut className="h-3.5 w-3.5" strokeWidth={1.5} />
               Sign Out
@@ -92,5 +96,6 @@ export default function CustomerLayout({
         {children}
       </main>
     </div>
+    </RoleTheme>
   );
 }

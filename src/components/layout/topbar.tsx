@@ -47,9 +47,9 @@ export function TopBar() {
           <input
             type="text"
             placeholder="Search anything..."
-            className="w-full h-9 pl-10 pr-14 text-[13px] bg-white/60 border border-border/50 rounded-full placeholder:text-muted-foreground/50 focus:outline-none focus:border-border focus:bg-white focus:shadow-sm transition-all"
+            className="w-full h-9 pl-10 pr-14 text-[13px] bg-white/40 backdrop-blur-sm border border-white/50 rounded-full placeholder:text-muted-foreground/50 focus:outline-none focus:border-white/70 focus:bg-white/60 focus:shadow-sm transition-all"
           />
-          <kbd className="absolute right-3.5 top-1/2 -translate-y-1/2 hidden sm:inline-flex h-5 items-center px-1.5 text-[10px] font-mono text-muted-foreground/60 bg-white/80 border border-border/40 rounded">
+          <kbd className="absolute right-3.5 top-1/2 -translate-y-1/2 hidden sm:inline-flex h-5 items-center px-1.5 text-[10px] font-mono text-muted-foreground/60 bg-white/60 border border-white/40 rounded">
             ⌘K
           </kbd>
         </div>
@@ -57,15 +57,15 @@ export function TopBar() {
 
       {/* Actions */}
       <div className="flex items-center gap-2">
-        <button className="relative h-9 w-9 flex items-center justify-center hover:bg-white/60 rounded-full transition-all duration-200">
+        <button className="relative h-9 w-9 flex items-center justify-center hover:bg-white/40 rounded-full transition-all duration-200 hover-glow">
           <Bell className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-teal-500 rounded-full ring-2 ring-white" />
+          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full ring-2 ring-white" style={{ background: 'hsl(var(--neon))' }} />
         </button>
 
         <div className="h-6 w-px bg-border/50 mx-1" />
 
-        <div className="flex items-center gap-2.5 px-2.5 py-1.5 hover:bg-white/60 rounded-xl transition-all duration-200 cursor-default">
-          <div className="h-8 w-8 rounded-full bg-gradient-to-br from-foreground to-foreground/70 flex items-center justify-center text-background text-[12px] font-semibold shadow-sm">
+        <div className="flex items-center gap-2.5 px-2.5 py-1.5 hover:bg-white/40 rounded-xl transition-all duration-200 cursor-default hover-glow">
+          <div className="h-8 w-8 rounded-full flex items-center justify-center text-white text-[12px] font-semibold shadow-sm" style={{ background: 'var(--role-gradient)' }}>
             {session?.user?.name?.[0]?.toUpperCase() ?? "U"}
           </div>
           <div className="hidden sm:block">
