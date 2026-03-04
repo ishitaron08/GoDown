@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn, getSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -22,7 +21,6 @@ const inputCls =
   "w-full px-4 py-2.5 border border-border bg-white text-[13px] placeholder:text-muted-foreground/40 focus:outline-none focus:border-foreground/20 transition-colors";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const {
@@ -42,23 +40,16 @@ export default function LoginPage() {
 
     if (res?.error) {
       toast.error("Invalid email or password");
-    } else {
-      toast.success("Welcome back");
-      // Redirect based on the user's permissions:
-      // internal users (admin/manager/staff) → dashboard
-      // customers / limited roles → orders page
-      const session = await getSession();
-      const perms: string[] = (session?.user as { permissions?: string[] })?.permissions ?? [];
-      const role = (session?.user as { role?: string })?.role;
-      if (role === "customer") {
-        router.push("/catalog");
-      } else if (perms.includes("dashboard:view")) {
-        router.push("/dashboard");
-      } else {
-        router.push("/catalog");
-      }
-      router.refresh();
+      return;
     }
+
+    toast.success("Welcome back");
+
+    // Use a full page navigation (window.location) so the browser sends the
+    // fresh session cookie on the next request — router.push does not guarantee
+    // the cookie is flushed before the navigation on Vercel / production HTTPS.
+    // We go to /dashboard; the middleware will redirect customers to /catalog.
+    window.location.href = "/dashboard";
   };
 
   return (
