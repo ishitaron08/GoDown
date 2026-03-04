@@ -1,0 +1,242 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════
+   GoDown Design System — Monochrome + Neon
+   Clean. Neutral. Reusable.
+   ═══════════════════════════════════════ */
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 63.9%;
+    --radius: 0px;
+
+    --chart-1: 0 0% 12%;
+    --chart-2: 0 0% 38%;
+    --chart-3: 160 84% 39%;
+    --chart-4: 0 0% 58%;
+    --chart-5: 0 0% 78%;
+
+    --sidebar-background: 0 0% 3.9%;
+    --sidebar-foreground: 0 0% 55%;
+    --sidebar-primary: 0 0% 98%;
+    --sidebar-primary-foreground: 0 0% 9%;
+    --sidebar-accent: 0 0% 10%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 14.9%;
+    --sidebar-ring: 160 84% 39%;
+
+    --neon: 160 84% 39%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  ::selection {
+    background: hsl(var(--neon) / 0.15);
+    color: hsl(var(--foreground));
+  }
+}
+
+/* ── Component Layer ── */
+
+@layer components {
+  /* Glass Panel */
+  .glass {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  /* Glass Panel – Frost */
+  .glass-frost {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+  }
+
+  /* Gradient-border surface */
+  .surface {
+    position: relative;
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  .surface::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.04) 0%,
+      transparent 50%,
+      transparent 100%
+    );
+  }
+
+  /* Skeleton shimmer */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      hsl(0 0% 96%) 25%,
+      hsl(0 0% 91%) 50%,
+      hsl(0 0% 96%) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  /* Monochrome chip / tag */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    background: hsl(var(--secondary));
+    color: hsl(var(--muted-foreground));
+    text-transform: capitalize;
+  }
+  .chip-active {
+    background: hsl(var(--foreground));
+    color: hsl(var(--background));
+  }
+  .chip-neon {
+    background: hsl(var(--neon) / 0.1);
+    color: hsl(var(--neon));
+  }
+  .chip-danger {
+    background: hsl(var(--destructive) / 0.08);
+    color: hsl(var(--destructive));
+  }
+}
+
+/* ── Utility Layer ── */
+
+@layer utilities {
+  .hover-lift {
+    transition: transform 200ms ease, box-shadow 200ms ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 8px 30px -8px rgba(0, 0, 0, 0.08),
+      0 2px 8px -2px rgba(0, 0, 0, 0.04);
+  }
+
+  .btn-press {
+    transition: transform 75ms ease;
+  }
+  .btn-press:active {
+    transform: scale(0.98);
+  }
+
+  .neon-glow {
+    box-shadow: 0 0 20px -4px hsl(var(--neon) / 0.25);
+  }
+
+  .text-neon {
+    color: hsl(var(--neon));
+  }
+
+  .bg-neon {
+    background-color: hsl(var(--neon));
+  }
+
+  /* Stagger children entrance */
+  .stagger > * {
+    animation: slideUp 0.35s ease-out both;
+  }
+  .stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger > *:nth-child(2) { animation-delay: 50ms; }
+  .stagger > *:nth-child(3) { animation-delay: 100ms; }
+  .stagger > *:nth-child(4) { animation-delay: 150ms; }
+  .stagger > *:nth-child(5) { animation-delay: 200ms; }
+  .stagger > *:nth-child(6) { animation-delay: 250ms; }
+  .stagger > *:nth-child(7) { animation-delay: 300ms; }
+  .stagger > *:nth-child(8) { animation-delay: 350ms; }
+  .stagger > *:nth-child(9) { animation-delay: 400ms; }
+  .stagger > *:nth-child(10) { animation-delay: 450ms; }
+  .stagger > *:nth-child(11) { animation-delay: 500ms; }
+  .stagger > *:nth-child(12) { animation-delay: 550ms; }
+}
+
+/* ── Keyframes ── */
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ── Scrollbar ── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.3);
+}

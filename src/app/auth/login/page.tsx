@@ -1,0 +1,138 @@
+"use client";
+
+import { useState } from "react";
+import { signIn, getSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { toast } from "sonner";
+import { Loader2, Warehouse } from "lucide-react";
+
+const LoginSchema = z.object({
+  email: z.string().email("Invalid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type LoginForm = z.infer<typeof LoginSchema>;
+
+const labelCls =
+  "block text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mb-1.5";
+const inputCls =
+  "w-full px-4 py-2.5 border border-border bg-white text-[13px] placeholder:text-muted-foreground/40 focus:outline-none focus:border-foreground/20 transition-colors";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginForm>({ resolver: zodResolver(LoginSchema) });
+
+  const onSubmit = async (data: LoginForm) => {
+    setLoading(true);
+    const res = await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
+    setLoading(false);
+
+    if (res?.error) {
+      toast.error("Invalid email or password");
+    } else {
+      toast.success("Welcome back");
+      // Redirect based on the user's permissions:
+      // internal users (admin/manager/staff) → dashboard
+      // customers / limited roles → orders page
+      const session = await getSession();
+      const perms: string[] = (session?.user as { permissions?: string[] })?.permissions ?? [];
+      const role = (session?.user as { role?: string })?.role;
+      if (role === "customer") {
+        router.push("/catalog");
+      } else if (perms.includes("dashboard:view")) {
+        router.push("/dashboard");
+      } else {
+        router.push("/catalog");
+      }
+      router.refresh();
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-secondary">
+      <div className="w-full max-w-md p-10 bg-white border border-black/[0.06] animate-scale-in">
+        {/* Logo */}
+        <div className="flex items-center justify-center gap-2.5 mb-10">
+          <Warehouse
+            className="h-5 w-5 text-neon"
+            strokeWidth={1.5}
+          />
+          <div>
+            <h1 className="text-lg font-semibold tracking-tight">GoDown</h1>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-[0.15em]">
+              Inventory Management
+            </p>
+          </div>
+        </div>
+
+        <h2 className="text-[14px] font-semibold text-center mb-8">
+          Sign in to your account
+        </h2>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div>
+            <label className={labelCls}>Email</label>
+            <input
+              {...register("email")}
+              type="email"
+              placeholder="you@example.com"
+              className={inputCls}
+            />
+            {errors.email && (
+              <p className="mt-1 text-[11px] text-destructive">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className={labelCls}>Password</label>
+            <input
+              {...register("password")}
+              type="password"
+              placeholder="••••••••"
+              className={inputCls}
+            />
+            {errors.password && (
+              <p className="mt-1 text-[11px] text-destructive">
+                {errors.password.message}
+              </p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2.5 bg-foreground text-background text-[13px] font-medium hover:bg-foreground/90 disabled:opacity-50 transition-colors flex items-center justify-center gap-2 btn-press"
+          >
+            {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+            {loading ? "Signing in..." : "Sign In"}
+          </button>
+        </form>
+
+        <p className="mt-8 text-center text-[12px] text-muted-foreground">
+          Don&apos;t have an account?{" "}
+          <a
+            href="/auth/register"
+            className="text-foreground font-medium underline underline-offset-4 hover:no-underline"
+          >
+            Register
+          </a>
+        </p>
+      </div>
+    </div>
+  );
+}
