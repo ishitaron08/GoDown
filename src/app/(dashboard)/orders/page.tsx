@@ -21,6 +21,7 @@ import {
   Package,
   Loader2,
   PlayCircle,
+  Truck,
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -48,6 +49,10 @@ interface Order {
   customerAddress?: string;
   customerPincode?: string;
   warehouse?: { name: string; city: string };
+  deliveryPartner?: { name: string; phone?: string; vehicles?: { vehicleNumber: string; vehicleType: string }[] };
+  deliveryVehicle?: string;
+  autoAssigned?: boolean;
+  autoAssignResult?: { warehouse?: { name: string; distance: number }; deliveryPartner?: { name: string; distance: number; vehicle?: { vehicleNumber: string; vehicleType: string } } };
 }
 
 const statusColors: Record<string, string> = {
@@ -121,13 +126,37 @@ export default function OrdersPage() {
   const updateStatus = async (orderId: string, status: string) => {
     setUpdatingId(orderId);
     try {
-      await axios.patch(`/api/orders/${orderId}`, { status });
-      toast.success(`Order marked as ${status}`);
+      const res = await axios.patch(`/api/orders/${orderId}`, { status });
+      const updated = res.data;
+
+      // Show auto-assign result
+      if (status === "processing" && updated.autoAssignResult?.deliveryPartner) {
+        const dp = updated.autoAssignResult.deliveryPartner;
+        toast.success(
+          `Order approved! Auto-assigned to ${dp.name}${dp.vehicle ? ` (${dp.vehicle.vehicleNumber})` : ""}`,
+          { duration: 5000 }
+        );
+      } else if (status === "processing") {
+        toast.success("Order approved & processing");
+      } else {
+        toast.success(`Order marked as ${status}`);
+      }
+
+      // Update list in-place
       setOrders((prev) =>
-        prev.map((o) => (o._id === orderId ? { ...o, status: status as Order["status"] } : o))
+        prev.map((o) => (o._id === orderId ? {
+          ...o,
+          status: updated.status ?? status as Order["status"],
+          deliveryStatus: updated.deliveryStatus ?? o.deliveryStatus,
+          deliveryPartner: updated.deliveryPartner ?? o.deliveryPartner,
+          deliveryVehicle: updated.deliveryVehicle ?? o.deliveryVehicle,
+          autoAssigned: updated.autoAssigned ?? o.autoAssigned,
+        } : o))
       );
+
+      // Refresh detail panel if open
       if (selectedOrder?._id === orderId) {
-        setSelectedOrder((prev) => prev ? { ...prev, status: status as Order["status"] } : prev);
+        setSelectedOrder(updated);
       }
     } catch {
       toast.error("Failed to update order status");
@@ -252,9 +281,16 @@ export default function OrdersPage() {
                           </span>
                         </td>
                         <td className="px-4 py-3.5">
-                          <span className={`inline-block px-2 py-0.5 text-[11px] font-medium rounded-full capitalize ${statusColors[o.status]}`}>
-                            {o.status}
-                          </span>
+                          <div className="flex flex-col gap-1">
+                            <span className={`inline-block px-2 py-0.5 text-[11px] font-medium rounded-full capitalize w-fit ${statusColors[o.status]}`}>
+                              {o.status}
+                            </span>
+                            {o.deliveryStatus && o.deliveryStatus !== "unassigned" && (
+                              <span className="inline-flex items-center gap-1 text-[10px] text-blue-600">
+                                <Truck className="h-2.5 w-2.5" /> {o.deliveryStatus}
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-4 py-3.5 text-muted-foreground max-w-[140px] truncate">
                           {o.customerName ?? o.supplier?.name ?? "—"}
@@ -414,6 +450,48 @@ export default function OrdersPage() {
                   <div className="border border-border p-4 space-y-2">
                     <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Warehouse</h3>
                     <p className="text-[13px]">{selectedOrder.warehouse.name}{selectedOrder.warehouse.city && ` · ${selectedOrder.warehouse.city}`}</p>
+                  </div>
+                )}
+
+                {/* Delivery Partner */}
+                {selectedOrder.deliveryPartner && (
+                  <div className="border border-blue-200 bg-blue-50/50 p-4 space-y-3">
+                    <h3 className="text-[11px] font-semibold uppercase tracking-wider text-blue-700 flex items-center gap-1.5">
+                      <Truck className="h-3 w-3" /> Delivery Partner
+                      {selectedOrder.autoAssigned && (
+                        <span className="ml-1 px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded text-[10px]">Auto-assigned</span>
+                      )}
+                    </h3>
+                    <div className="space-y-1.5 text-[13px]">
+                      <p className="font-medium">{selectedOrder.deliveryPartner.name}</p>
+                      {selectedOrder.deliveryPartner.phone && (
+                        <p className="text-muted-foreground flex items-center gap-1.5">
+                          <Phone className="h-3 w-3" /> {selectedOrder.deliveryPartner.phone}
+                        </p>
+                      )}
+                      {selectedOrder.deliveryVehicle && (
+                        <p className="text-muted-foreground flex items-center gap-1.5">
+                          <Truck className="h-3 w-3" /> Vehicle: {selectedOrder.deliveryVehicle}
+                        </p>
+                      )}
+                      {selectedOrder.deliveryStatus && (
+                        <p className="text-[12px]">
+                          Status: <span className="capitalize font-medium">{selectedOrder.deliveryStatus}</span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Pending approval notice for outbound orders */}
+                {selectedOrder.status === "pending" && selectedOrder.type === "outbound" && (
+                  <div className="border border-amber-200 bg-amber-50/50 p-4 space-y-2">
+                    <h3 className="text-[11px] font-semibold uppercase tracking-wider text-amber-700">
+                      Awaiting Approval
+                    </h3>
+                    <p className="text-[12px] text-amber-700">
+                      Click <strong>Approve</strong> to accept this order. A delivery partner will be automatically assigned once approved.
+                    </p>
                   </div>
                 )}
 
