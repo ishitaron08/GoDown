@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
+import { useState } from "react";
 import {
   LayoutDashboard,
   Package,
@@ -16,6 +17,8 @@ import {
   Shield,
   MapPin,
   Boxes,
+  Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +33,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, permission: "dashboard:view" },
   { href: "/products", label: "Products", icon: Package, permission: "products:view" },
   { href: "/orders", label: "Orders", icon: ClipboardList, permission: "orders:view" },
+  { href: "/deliveries", label: "My Deliveries", icon: Truck, permission: "deliveries:view" },
   { href: "/suppliers", label: "Delivery Partners", icon: Truck, permission: "suppliers:view" },
   { href: "/reports", label: "Reports", icon: BarChart3, permission: "reports:view" },
   { href: "/ai", label: "AI Assistant", icon: Bot, permission: "ai:view" },
@@ -45,15 +49,24 @@ const adminItems: NavItem[] = [
   { href: "/settings/roles", label: "Roles", icon: Shield, permission: "roles:view" },
 ];
 
-export function Sidebar() {
+function SidebarContent() {
   const pathname = usePathname();
   const { data: session } = useSession();
 
   const permissions: string[] = session?.user?.permissions ?? [];
+  const userRole = session?.user?.role ?? "";
 
-  const visibleNav = navItems.filter(
-    (item) => !item.permission || permissions.includes(item.permission)
-  );
+  // Filter nav items: hide "Orders" and "Delivery Partners" for delivery-partner role
+  const visibleNav = navItems.filter((item) => {
+    if (!item.permission || !permissions.includes(item.permission)) {
+      return false;
+    }
+    // Hide "Orders" and "Suppliers" (Delivery Partners) for delivery partners
+    if (userRole === "delivery-partner" && (item.href === "/orders" || item.href === "/suppliers")) {
+      return false;
+    }
+    return true;
+  });
 
   const visibleGodown = godownItems.filter(
     (item) => !item.permission || permissions.includes(item.permission)
@@ -64,7 +77,7 @@ export function Sidebar() {
   );
 
   return (
-    <aside className="w-[240px] min-h-screen bg-sidebar flex flex-col border-r border-sidebar-border shrink-0">
+    <>
       {/* Logo */}
       <div className="h-14 flex items-center px-6 border-b border-sidebar-border">
         <div className="flex items-center gap-2.5">
@@ -76,7 +89,7 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 pt-6 pb-4">
+      <nav className="flex-1 px-3 pt-6 pb-4 overflow-y-auto">
         <p className="px-3 mb-3 text-[10px] font-medium uppercase tracking-[0.12em] text-sidebar-foreground">
           Navigation
         </p>
@@ -149,7 +162,7 @@ export function Sidebar() {
           </>
         )}
 
-        {/* Admin section — shown if user has any admin-level permissions */}
+        {/* Admin section */}
         {visibleAdmin.length > 0 && (
           <>
             <div className="my-5 border-t border-sidebar-border" />
@@ -216,6 +229,49 @@ export function Sidebar() {
           Sign Out
         </button>
       </div>
-    </aside>
+    </>
+  );
+}
+
+export function Sidebar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-[240px] h-screen bg-sidebar flex-col border-r border-sidebar-border shrink-0 overflow-hidden">
+        <SidebarContent />
+      </aside>
+
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setMobileOpen(!mobileOpen)}
+        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded hover:bg-secondary transition-colors"
+      >
+        {mobileOpen ? (
+          <X className="h-5 w-5" strokeWidth={1.5} />
+        ) : (
+          <Menu className="h-5 w-5" strokeWidth={1.5} />
+        )}
+      </button>
+
+      {/* Mobile Sidebar Overlay */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Mobile Sidebar Drawer */}
+      <aside
+        className={cn(
+          "md:hidden fixed top-0 left-0 z-40 w-[240px] h-screen bg-sidebar flex flex-col border-r border-sidebar-border overflow-hidden transition-transform duration-300",
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <SidebarContent />
+      </aside>
+    </>
   );
 }

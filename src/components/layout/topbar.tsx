@@ -26,15 +26,18 @@ export function TopBar() {
     "GoDown";
 
   return (
-    <header className="sticky top-0 z-30 h-14 flex items-center justify-between px-8 bg-white/80 backdrop-blur-xl border-b border-black/[0.06]">
-      {/* Title */}
-      <h1 className="text-[15px] font-semibold tracking-tight text-foreground">
+    <header className="sticky top-0 z-30 h-14 flex items-center justify-between px-3 md:px-6 bg-white/80 backdrop-blur-xl border-b border-black/[0.06]">
+      {/* Title - Add margin left for mobile menu button */}
+      <h1 className="md:hidden text-[13px] font-semibold tracking-tight text-foreground ml-10">
+        {title}
+      </h1>
+      <h1 className="hidden md:block text-[15px] font-semibold tracking-tight text-foreground">
         {title}
       </h1>
 
-      {/* Search */}
-      <div className="flex-1 max-w-md mx-8">
-        <div className="relative">
+      {/* Search - Hidden on mobile */}
+      <div className="hidden md:flex flex-1 max-w-md mx-8">
+        <div className="relative w-full">
           <Search
             className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground"
             strokeWidth={1.5}
@@ -57,13 +60,13 @@ export function TopBar() {
           <span className="absolute top-1 right-1 h-1.5 w-1.5 bg-neon rounded-full" />
         </button>
 
-        <div className="h-5 w-px bg-border mx-2" />
+        <div className="hidden md:block h-5 w-px bg-border mx-2" />
 
-        <div className="flex items-center gap-2.5 px-2 py-1 hover:bg-secondary transition-colors cursor-default">
+        <div className="hidden md:flex items-center gap-2.5 px-2 py-1 hover:bg-secondary transition-colors cursor-default">
           <div className="h-7 w-7 flex items-center justify-center bg-foreground text-background text-[11px] font-medium">
             {session?.user?.name?.[0]?.toUpperCase() ?? "U"}
           </div>
-          <div className="hidden sm:block">
+          <div>
             <p className="text-[12px] font-medium leading-tight text-foreground">
               {session?.user?.name}
             </p>
@@ -71,6 +74,11 @@ export function TopBar() {
               {session?.user?.role}
             </p>
           </div>
+        </div>
+
+        {/* Mobile user avatar */}
+        <div className="md:hidden h-8 w-8 flex items-center justify-center bg-foreground text-background text-[11px] font-medium">
+          {session?.user?.name?.[0]?.toUpperCase() ?? "U"}
         </div>
       </div>
     </header>

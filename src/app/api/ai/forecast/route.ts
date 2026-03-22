@@ -7,6 +7,7 @@ import { Product } from "@/models/Product";
 import { WarehouseStock } from "@/models/WarehouseStock";
 import { Warehouse } from "@/models/Warehouse";
 import { openai, OpenAIQuotaError } from "@/lib/openai";
+import { validateForecastRequest, logSuspiciousActivity } from "@/lib/ai-security";
 
 // Same free model list for fallback — system-compatible models first
 const FREE_MODELS = [
@@ -33,10 +34,19 @@ export const dynamic = "force-dynamic";
  * Body: { warehouseId?: string }  — omit for global forecast
  */
 export async function POST(req: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  // 🔒 Permission Check: Only Admin/Manager roles can access forecasting
+  const userRole = session.user?.role;
+  if (!["admin", "manager"].includes(userRole)) {
+    return NextResponse.json(
+      { error: "Demand forecasting is restricted to Admin & Manager roles only" },
+      { status: 403 }
+    );
+  }
+
+  try {
     // Rate limit: 5 req/min
     const rl = await rateLimit(`forecast:${session.user.id}`, 5, 60);
     if (!rl.success) {
@@ -47,6 +57,18 @@ export async function POST(req: NextRequest) {
     }
 
     const { warehouseId } = await req.json().catch(() => ({}));
+
+    // 🔒 Security: Validate request parameters
+    const validation = validateForecastRequest({ warehouseId });
+    if (!validation.valid) {
+      logSuspiciousActivity(
+        session.user?.email || "unknown",
+        "forecast-invalid-request",
+        validation.reason || "invalid parameters",
+        "low"
+      );
+      return NextResponse.json({ error: validation.reason }, { status: 400 });
+    }
 
     // Check cache first (6 hour TTL)
     const cacheKey = `forecast:${warehouseId ?? "all"}`;
@@ -171,7 +193,9 @@ suggestedRestock = max(0, predictedNext7Days * 2 - currentStock) — enough for 
       const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
       forecast = JSON.parse(cleaned);
     } catch {
-      forecast = [{ error: "Failed to parse AI response", raw }];
+      // 🔒 Security: Don't expose raw AI response on parse error
+      console.error("Failed to parse forecast JSON");
+      forecast = [];
     }
 
     const result = {
@@ -188,12 +212,21 @@ suggestedRestock = max(0, predictedNext7Days * 2 - currentStock) — enough for 
     return NextResponse.json(result);
   } catch (err: any) {
     console.error("[AI Forecast]", err);
+
+    // 🔒 Security: Don't expose internal error details to client
     if (err instanceof OpenAIQuotaError) {
+      logSuspiciousActivity(session.user?.email || "unknown", "forecast-quota-exceeded", err.message, "medium");
       return NextResponse.json(
         { error: err.message, code: "quota_exceeded" },
         { status: 402 }
       );
     }
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    // Log but return generic message
+    logSuspiciousActivity(session.user?.email || "unknown", "forecast-error", String(err?.message || "unknown"), "low");
+    return NextResponse.json(
+      { error: "Unable to generate forecast. Please try again." },
+      { status: 500 }
+    );
   }
 }

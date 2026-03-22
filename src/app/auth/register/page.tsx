@@ -1,55 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { toast } from "sonner";
-import { Loader2, Warehouse } from "lucide-react";
-import axios from "axios";
-
-const RegisterSchema = z.object({
-  name: z.string().min(2, "Name too short"),
-  email: z.string().email("Invalid email"),
-  password: z.string().min(6, "Min 6 characters"),
-});
-
-type RegisterForm = z.infer<typeof RegisterSchema>;
-
-const labelCls =
-  "block text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mb-1.5";
-const inputCls =
-  "w-full px-4 py-2.5 border border-border bg-white text-[13px] placeholder:text-muted-foreground/40 focus:outline-none focus:border-foreground/20 transition-colors";
+import { Warehouse, Lock } from "lucide-react";
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<RegisterForm>({
-    resolver: zodResolver(RegisterSchema),
-  });
-
-  const onSubmit = async (data: RegisterForm) => {
-    setLoading(true);
-    try {
-      await axios.post("/api/auth/register", data);
-      toast.success("Account created! Please log in.");
-      router.push("/auth/login");
-    } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { error?: string } } })?.response?.data
-          ?.error ?? "Registration failed";
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-secondary">
       <div className="w-full max-w-md p-10 bg-white border border-black/[0.06] animate-scale-in">
@@ -67,65 +20,45 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <h2 className="text-[14px] font-semibold text-center mb-8">
-          Create an account
-        </h2>
+        {/* Access Denied Message */}
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="h-12 w-12 flex items-center justify-center bg-red-50">
+            <Lock className="h-6 w-6 text-red-600" strokeWidth={1.5} />
+          </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          {[
-            {
-              label: "Full Name",
-              name: "name" as const,
-              type: "text",
-              placeholder: "John Doe",
-            },
-            {
-              label: "Email",
-              name: "email" as const,
-              type: "email",
-              placeholder: "you@example.com",
-            },
-            {
-              label: "Password",
-              name: "password" as const,
-              type: "password",
-              placeholder: "••••••••",
-            },
-          ].map(({ label, name, type, placeholder }) => (
-            <div key={name}>
-              <label className={labelCls}>{label}</label>
-              <input
-                {...register(name)}
-                type={type}
-                placeholder={placeholder}
-                className={inputCls}
-              />
-              {errors[name] && (
-                <p className="mt-1 text-[11px] text-destructive">
-                  {errors[name]?.message}
-                </p>
-              )}
-            </div>
-          ))}
+          <div>
+            <h2 className="text-[14px] font-semibold text-foreground mb-2">
+              Registration Disabled
+            </h2>
+            <p className="text-[13px] text-muted-foreground mb-4">
+              User accounts are managed by administrators only. No public self-registration is allowed.
+            </p>
+            <p className="text-[12px] text-muted-foreground mb-6">
+              If you need an account, contact your system administrator.
+            </p>
+          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-2.5 bg-foreground text-background text-[13px] font-medium hover:bg-foreground/90 disabled:opacity-50 transition-colors flex items-center justify-center gap-2 btn-press"
-          >
-            {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            {loading ? "Creating..." : "Create Account"}
-          </button>
-        </form>
+          {/* Demo Info Box */}
+          <div className="w-full p-4 bg-amber-50 border border-amber-200 text-left">
+            <p className="text-[11px] font-medium text-amber-900 mb-2">
+              📝 Demo Credentials Available
+            </p>
+            <p className="text-[10px] text-amber-800">
+              Click "Back to Login" to view available demo accounts and credentials.
+            </p>
+          </div>
 
-        <p className="mt-8 text-center text-[12px] text-muted-foreground">
-          Already have an account?{" "}
+          {/* Back to Login Button */}
           <a
             href="/auth/login"
-            className="text-foreground font-medium underline underline-offset-4 hover:no-underline"
+            className="w-full py-2.5 bg-foreground text-background text-[13px] font-medium hover:bg-foreground/90 transition-colors flex items-center justify-center gap-2 btn-press"
           >
-            Sign in
+            Back to Login
           </a>
+        </div>
+
+        <p className="mt-8 text-center text-[12px] text-muted-foreground">
+          🔒 This system requires database-verified accounts only.
         </p>
       </div>
     </div>

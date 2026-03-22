@@ -1,4 +1,4 @@
-import { Schema, model, models, Document } from "mongoose";
+import { Schema, model, models, Document, Types } from "mongoose";
 
 export interface IUser extends Document {
   name: string;
@@ -6,6 +6,7 @@ export interface IUser extends Document {
   password: string;
   role: string;           // slug of the Role document (e.g. "admin", "manager", "staff", "delivery-partner", or custom)
   avatar?: string;
+  assignedWarehouse?: Types.ObjectId;  // For delivery partners: warehouse they're assigned to
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -21,6 +22,7 @@ const UserSchema = new Schema<IUser>(
       default: "staff",     // matches the default Role slug
     },
     avatar: { type: String },
+    assignedWarehouse: { type: Schema.Types.ObjectId, ref: "Warehouse" },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }

@@ -66,19 +66,19 @@ function StatCard({
   icon: React.ElementType;
 }) {
   return (
-    <div className="surface p-6 hover-lift">
+    <div className="surface p-4 md:p-6 hover-lift">
       <div className="flex items-start justify-between">
         <div className="space-y-1.5">
-          <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
+          <p className="text-[10px] md:text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
             {title}
           </p>
-          <p className="text-2xl font-semibold tracking-tight">{value}</p>
+          <p className="text-xl md:text-2xl font-semibold tracking-tight">{value}</p>
           {subtitle && (
-            <p className="text-[12px] text-muted-foreground">{subtitle}</p>
+            <p className="text-[11px] md:text-[12px] text-muted-foreground">{subtitle}</p>
           )}
         </div>
-        <div className="h-10 w-10 flex items-center justify-center bg-secondary">
-          <Icon className="h-[18px] w-[18px] text-foreground/60" strokeWidth={1.5} />
+        <div className="h-9 w-9 md:h-10 md:w-10 flex items-center justify-center bg-secondary shrink-0">
+          <Icon className="h-[16px] w-[16px] md:h-[18px] md:w-[18px] text-foreground/60" strokeWidth={1.5} />
         </div>
       </div>
     </div>
@@ -138,7 +138,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="space-y-8 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div>
           <div className="skeleton h-6 w-32 rounded-sm" />
           <div className="skeleton h-3 w-48 rounded-sm mt-2" />
@@ -186,56 +186,56 @@ export default function DashboardPage() {
   }));
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-lg font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-[13px] text-muted-foreground mt-0.5">
+        <h1 className="text-base md:text-lg font-semibold tracking-tight">Dashboard</h1>
+        <p className="text-[12px] md:text-[13px] text-muted-foreground mt-0.5">
           Real-time warehouse overview
         </p>
       </div>
 
       {/* Live Pulse */}
       {live && (
-        <div className="surface p-4 border-l-2 border-emerald-500">
-          <div className="flex items-center gap-2 mb-3">
+        <div className="surface p-3 md:p-4 border-l-2 border-emerald-500">
+          <div className="flex items-center gap-2 mb-2 md:mb-3">
             {liveConnected && (
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
               </span>
             )}
-            <span className="text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
+            <span className="text-[10px] md:text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
               Live Pulse
             </span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="flex items-center gap-2.5 p-2.5 bg-secondary/50">
-              <Activity className="h-4 w-4 text-blue-500 shrink-0" strokeWidth={1.5} />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+            <div className="flex items-center gap-2 p-2 md:p-2.5 bg-secondary/50">
+              <Activity className="h-3.5 w-3.5 md:h-4 md:w-4 text-blue-500 shrink-0" strokeWidth={1.5} />
               <div>
-                <p className="text-[18px] font-semibold tabular-nums leading-none">{live.ordersProcessing + live.ordersInTransit}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Active Orders</p>
+                <p className="text-base md:text-[18px] font-semibold tabular-nums leading-none">{live.ordersProcessing + live.ordersInTransit}</p>
+                <p className="text-[9px] md:text-[10px] text-muted-foreground mt-0.5">Active</p>
               </div>
             </div>
-            <div className="flex items-center gap-2.5 p-2.5 bg-secondary/50">
-              <Users className="h-4 w-4 text-emerald-500 shrink-0" strokeWidth={1.5} />
+            <div className="flex items-center gap-2 p-2 md:p-2.5 bg-secondary/50">
+              <Users className="h-3.5 w-3.5 md:h-4 md:w-4 text-emerald-500 shrink-0" strokeWidth={1.5} />
               <div>
-                <p className="text-[18px] font-semibold tabular-nums leading-none">{live.partnersOnline}<span className="text-[11px] font-normal text-muted-foreground">/{live.partnersTotal}</span></p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Partners Online</p>
+                <p className="text-base md:text-[18px] font-semibold tabular-nums leading-none">{live.partnersOnline}<span className="text-[9px] md:text-[11px] font-normal text-muted-foreground">/{live.partnersTotal}</span></p>
+                <p className="text-[9px] md:text-[10px] text-muted-foreground mt-0.5">Online</p>
               </div>
             </div>
-            <div className="flex items-center gap-2.5 p-2.5 bg-secondary/50">
-              <Warehouse className="h-4 w-4 text-amber-500 shrink-0" strokeWidth={1.5} />
+            <div className="flex items-center gap-2 p-2 md:p-2.5 bg-secondary/50">
+              <Warehouse className="h-3.5 w-3.5 md:h-4 md:w-4 text-amber-500 shrink-0" strokeWidth={1.5} />
               <div>
-                <p className="text-[18px] font-semibold tabular-nums leading-none">{live.staleWarehouses}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Stale Warehouses</p>
+                <p className="text-base md:text-[18px] font-semibold tabular-nums leading-none">{live.staleWarehouses}</p>
+                <p className="text-[9px] md:text-[10px] text-muted-foreground mt-0.5">Stale</p>
               </div>
             </div>
-            <div className="flex items-center gap-2.5 p-2.5 bg-secondary/50">
-              <DollarSign className="h-4 w-4 text-violet-500 shrink-0" strokeWidth={1.5} />
+            <div className="flex items-center gap-2 p-2 md:p-2.5 bg-secondary/50">
+              <DollarSign className="h-3.5 w-3.5 md:h-4 md:w-4 text-violet-500 shrink-0" strokeWidth={1.5} />
               <div>
-                <p className="text-[18px] font-semibold tabular-nums leading-none">{formatCurrency(live.todayRevenue)}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Today&apos;s Revenue</p>
+                <p className="text-base md:text-[18px] font-semibold tabular-nums leading-none">{formatCurrency(live.todayRevenue)}</p>
+                <p className="text-[9px] md:text-[10px] text-muted-foreground mt-0.5">Revenue</p>
               </div>
             </div>
           </div>
@@ -243,7 +243,7 @@ export default function DashboardPage() {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 stagger">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-4 stagger">
         <StatCard
           title="Total Products"
           value={formatNumber(stats.products.total)}
@@ -271,9 +271,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-6">
         {/* Bar Chart */}
-        <div className="xl:col-span-2 surface p-6">
+        <div className="lg:col-span-2 surface p-3 md:p-6">
           <h2 className="text-[13px] font-semibold tracking-tight mb-6">
             Orders by Status
           </h2>
@@ -282,7 +282,7 @@ export default function DashboardPage() {
               No order data yet
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={110}>
               <BarChart
                 data={orderChartData}
                 margin={{ top: 4, right: 4, bottom: 0, left: -8 }}
@@ -326,7 +326,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Low Stock */}
-        <div className="surface p-6">
+        <div className="surface p-3 md:p-6">
           <h2 className="text-[13px] font-semibold tracking-tight mb-6">
             Low Stock Alerts
           </h2>
@@ -378,7 +378,7 @@ export default function DashboardPage() {
 
       {/* Recent Movements */}
       <div className="surface overflow-hidden">
-        <div className="px-6 py-4 border-b border-black/[0.06]">
+        <div className="px-3 md:px-6 py-3 md:py-4 border-b border-black/[0.06]">
           <h2 className="text-[13px] font-semibold tracking-tight">
             Recent Stock Movements
           </h2>
@@ -387,19 +387,19 @@ export default function DashboardPage() {
           <table className="w-full text-[13px]">
             <thead>
               <tr className="border-b border-black/[0.04]">
-                <th className="text-left px-6 py-3 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                <th className="text-left px-3 md:px-6 py-2 md:py-3 text-[10px] md:text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
                   Product
                 </th>
-                <th className="text-left px-6 py-3 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                <th className="text-left px-3 md:px-6 py-2 md:py-3 text-[10px] md:text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
                   Type
                 </th>
-                <th className="text-left px-6 py-3 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                <th className="text-left px-3 md:px-6 py-2 md:py-3 text-[10px] md:text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
                   Qty
                 </th>
-                <th className="text-left px-6 py-3 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                <th className="hidden md:table-cell text-left px-6 py-3 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
                   By
                 </th>
-                <th className="text-left px-6 py-3 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+                <th className="hidden md:table-cell text-left px-6 py-3 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
                   Date
                 </th>
               </tr>
@@ -409,7 +409,7 @@ export default function DashboardPage() {
                 <tr>
                   <td
                     colSpan={5}
-                    className="text-center py-12 text-muted-foreground text-[13px]"
+                    className="text-center py-8 md:py-12 text-muted-foreground text-[13px]"
                   >
                     No movements recorded
                   </td>
@@ -420,10 +420,10 @@ export default function DashboardPage() {
                     key={m._id}
                     className="border-t border-black/[0.03] hover:bg-secondary/50 transition-colors"
                   >
-                    <td className="px-6 py-3 font-medium">
+                    <td className="px-3 md:px-6 py-2 md:py-3 font-medium text-[12px] md:text-[13px]">
                       {m.product?.name ?? "—"}
                     </td>
-                    <td className="px-6 py-3">
+                    <td className="px-3 md:px-6 py-2 md:py-3">
                       <span className="chip">
                         {m.type === "in" ? (
                           <ArrowUpRight className="h-3 w-3" />
@@ -433,13 +433,13 @@ export default function DashboardPage() {
                         {m.type}
                       </span>
                     </td>
-                    <td className="px-6 py-3 font-medium tabular-nums">
+                    <td className="px-3 md:px-6 py-2 md:py-3 font-medium tabular-nums text-[12px] md:text-[13px]">
                       {m.quantity}
                     </td>
-                    <td className="px-6 py-3 text-muted-foreground">
+                    <td className="hidden md:table-cell px-6 py-3 text-muted-foreground text-[13px]">
                       {m.performedBy?.name ?? "—"}
                     </td>
-                    <td className="px-6 py-3 text-muted-foreground">
+                    <td className="hidden md:table-cell px-6 py-3 text-muted-foreground text-[13px]">
                       {formatDate(m.createdAt)}
                     </td>
                   </tr>

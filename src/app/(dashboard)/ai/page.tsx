@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import axios from "axios";
 import { toast } from "sonner";
-import { Bot, Send, Loader2, User, TrendingUp, AlertTriangle, CheckCircle, Info } from "lucide-react";
+import { Bot, Send, Loader2, User, TrendingUp, AlertTriangle, CheckCircle, Info, Lock } from "lucide-react";
 
 interface Message {
   role: "user" | "assistant";
@@ -34,6 +35,7 @@ const riskColors: Record<string, { bg: string; text: string; icon: any }> = {
 };
 
 export default function AIPage() {
+  const { data: session } = useSession();
   const [tab, setTab] = useState<"chat" | "forecast">("chat");
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -49,6 +51,9 @@ export default function AIPage() {
   const [forecastGenerated, setForecastGenerated] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // 🔒 Check if user has permission to access AI
+  const hasAIAccess = ["admin", "manager"].includes(session?.user?.role || "");
+
   const generateForecast = async () => {
     setForecastLoading(true);
     try {
@@ -58,7 +63,12 @@ export default function AIPage() {
       toast.success("Demand forecast generated");
     } catch (err: any) {
       const msg = err?.response?.data?.error || "Failed to generate forecast";
-      toast.error(msg);
+      const isForbidden = err?.response?.status === 403;
+      if (isForbidden) {
+        toast.error("Permission denied: Forecasting requires Admin/Manager role");
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setForecastLoading(false);
     }
@@ -90,13 +100,16 @@ export default function AIPage() {
       ]);
     } catch (err: any) {
       const serverMsg = err?.response?.data?.error;
+      const isForbidden = err?.response?.status === 403;
       const isQuota = err?.response?.data?.code === "quota_exceeded" || err?.response?.status === 402;
-      const displayMsg = isQuota
+      const displayMsg = isForbidden
+        ? `🔒 ${serverMsg || "You don't have permission to use AI features"}`
+        : isQuota
         ? `⚠️ OpenAI API quota exceeded. The AI features require a valid OpenAI API key with available credits. Please update your API key in the .env.local file or add credits at https://platform.openai.com/account/billing`
         : serverMsg
           ? `Error: ${serverMsg}`
           : "Sorry, I encountered an error. Please try again.";
-      toast.error(isQuota ? "OpenAI quota exceeded" : "AI request failed");
+      toast.error(isForbidden ? "Permission denied" : isQuota ? "OpenAI quota exceeded" : "AI request failed");
       setMessages([
         ...newMessages,
         { role: "assistant", content: displayMsg },
@@ -115,6 +128,24 @@ export default function AIPage() {
         </p>
       </div>
 
+      {/* 🔒 Permission Guard */}
+      {!hasAIAccess ? (
+        <div className="surface p-8 flex flex-col items-center gap-4 text-center">
+          <div className="h-12 w-12 flex items-center justify-center bg-red-50">
+            <Lock className="h-5 w-5 text-red-600" strokeWidth={1.5} />
+          </div>
+          <div>
+            <h2 className="text-[14px] font-semibold text-foreground mb-1">Access Restricted</h2>
+            <p className="text-[13px] text-muted-foreground">
+              AI features are only available to Admin and Manager roles.
+            </p>
+            <p className="text-[12px] text-muted-foreground mt-2">
+              Your current role: <span className="font-medium capitalize">{session?.user?.role}</span>
+            </p>
+          </div>
+        </div>
+      ) : (
+        <>
       {/* Tabs */}
       <div className="flex gap-1 border-b border-border">
         <button
@@ -305,6 +336,8 @@ export default function AIPage() {
             </div>
           )}
         </div>
+      )}
+        </>
       )}
     </div>
   );

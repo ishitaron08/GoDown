@@ -10,25 +10,41 @@ import { WarehouseStock } from "@/models/WarehouseStock";
 import { Order } from "@/models/Order";
 import { rateLimit } from "@/lib/rate-limit";
 import { User } from "@/models/User";
+import {
+  validateQuestion,
+  sanitizeInput,
+  filterAIResponse,
+  detectSuspiciousResponse,
+  logSuspiciousActivity,
+} from "@/lib/ai-security";
 // Ensure models are registered
 void Category; void Warehouse; void WarehouseStock; void Order; void User;
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // 🔒 Permission Check: Only Admin/Manager roles can access AI
+  const userRole = session.user?.role;
+  if (!["admin", "manager"].includes(userRole)) {
+    return NextResponse.json(
+      { error: "AI features are restricted to Admin & Manager roles only" },
+      { status: 403 }
+    );
+  }
+
+  // Rate limit: 20 requests per minute per user
+  const rl = await rateLimit(`ai:${session.user?.email}`, 20, 60);
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: "Too many AI requests. Please wait.", resetIn: rl.resetIn },
+      { status: 429 }
+    );
+  }
+
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    // Rate limit: 20 requests per minute per user
-    const rl = await rateLimit(`ai:${session.user?.email}`, 20, 60);
-    if (!rl.success) {
-      return NextResponse.json(
-        { error: "Too many AI requests. Please wait.", resetIn: rl.resetIn },
-        { status: 429 }
-      );
-    }
-
     const { action, payload } = await req.json();
 
     if (action === "describe-product") {
@@ -43,6 +59,15 @@ export async function POST(req: NextRequest) {
     if (action === "ask") {
       const { question } = payload;
       if (!question) return NextResponse.json({ error: "question required" }, { status: 400 });
+
+      // 🔒 Security: Validate and sanitize input
+      const validation = validateQuestion(question);
+      if (!validation.valid) {
+        logSuspiciousActivity(session.user?.email || "unknown", "ai-ask", validation.reason || "invalid question", "low");
+        return NextResponse.json({ error: validation.reason }, { status: 400 });
+      }
+
+      const sanitizedQuestion = sanitizeInput(question);
 
       await connectDB();
 
@@ -67,13 +92,12 @@ export async function POST(req: NextRequest) {
           .populate("category", "name")
           .sort({ quantity: -1 })
           .limit(10)
-          .select("name sku quantity minStockLevel unit price costPrice")
+          .select("name sku quantity minStockLevel unit")
           .lean(),
         // Categories
         Category.find().select("name").lean(),
         // GoDowns
         Warehouse.find({ isActive: true })
-          .populate("manager", "name")
           .select("name code city")
           .lean() as Promise<any[]>,
         // Per-GoDown stock summary
@@ -107,10 +131,10 @@ export async function POST(req: NextRequest) {
         return `${g.name} (${g.code}, ${g.city}): ${s.productCount} products, ${s.totalUnits} units`;
       }).join(" | ");
 
-      // Build product list
+      // Build product list (without pricing info)
       const productList = (topProducts as any[]).map((p: any) => {
         const status = p.quantity === 0 ? "OUT OF STOCK" : p.quantity <= p.minStockLevel ? "LOW STOCK" : "OK";
-        return `${p.name} [${p.sku}]: qty=${p.quantity}${p.unit}, min=${p.minStockLevel}, price=₹${p.price} [${status}]`;
+        return `${p.name} [${p.sku}]: qty=${p.quantity}${p.unit}, min=${p.minStockLevel} [${status}]`;
       }).join(" | ");
 
       // Build order summary
@@ -119,26 +143,57 @@ export async function POST(req: NextRequest) {
       const s = productStats[0];
       const context = s
         ? `INVENTORY SYSTEM: GoDown (warehouse management).\n` +
-          `PRODUCTS: ${s.totalProducts} total, ${s.totalItems} total units, ₹${Math.round(s.totalValue).toLocaleString("en-IN")} inventory value, ${s.lowStock} low-stock alerts, ${s.outOfStock} out-of-stock.\n` +
+          `PRODUCTS: ${s.totalProducts} total, ${s.totalItems} total units, ${s.lowStock} low-stock alerts, ${s.outOfStock} out-of-stock.\n` +
           `CATEGORIES: ${(categories as any[]).map((c: any) => c.name).join(", ") || "none"}.\n` +
           `GODOWNS: ${godowns.length} active | ${godownSummary || "none"}.\n` +
           `TOP PRODUCTS: ${productList}.\n` +
           `ORDERS: ${orderSummary}.`
         : "No inventory data available yet. The system is empty.";
 
-      const answer = await askInventoryAI(question, context);
-      return NextResponse.json({ answer });
+      const answer = await askInventoryAI(sanitizedQuestion, context);
+
+      // 🔒 Security: Filter response to prevent data leakage
+      const filtered = filterAIResponse(answer);
+
+      // 🔒 Security: Detect if response contains suspicious patterns
+      if (detectSuspiciousResponse(filtered)) {
+        logSuspiciousActivity(
+          session.user?.email || "unknown",
+          "ai-ask-suspicious-response",
+          `Question: ${sanitizedQuestion.substring(0, 100)}...`,
+          "high"
+        );
+        // Return generic response instead of suspicious one
+        return NextResponse.json({
+          answer:
+            "I can only help with inventory-related questions. Please ask about stock levels, products, or warehouse status.",
+        });
+      }
+
+      return NextResponse.json({ answer: filtered });
     }
 
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   } catch (error) {
     console.error("[POST /api/ai]", error);
+
+    // 🔒 Security: Don't expose internal error details to client
     if (error instanceof OpenAIQuotaError) {
+      logSuspiciousActivity(session.user?.email || "unknown", "ai-quota-exceeded", error.message, "medium");
       return NextResponse.json(
         { error: error.message, code: "quota_exceeded" },
         { status: 402 }
       );
     }
-    return NextResponse.json({ error: "AI request failed" }, { status: 500 });
+
+    // Log the error but return generic message to client
+    if (error instanceof Error) {
+      logSuspiciousActivity(session.user?.email || "unknown", "ai-error", error.message, "low");
+    }
+
+    return NextResponse.json(
+      { error: "Unable to process your request. Please try again." },
+      { status: 500 }
+    );
   }
 }

@@ -6,8 +6,9 @@ import { Order } from "@/models/Order";
 import { Supplier } from "@/models/Supplier";
 import { Product } from "@/models/Product";
 import { User } from "@/models/User";
+import { Warehouse } from "@/models/Warehouse";
 import { z } from "zod";
-void Supplier; void Product; void User;
+void Supplier; void Product; void Warehouse;
 
 export const dynamic = "force-dynamic";
 
@@ -24,10 +25,17 @@ const CreateOrderSchema = z.object({
   items: z.array(OrderItemSchema).min(1),
   totalAmount: z.number().min(0),
   notes: z.string().optional(),
+  customerName: z.string().optional(),
+  customerPhone: z.string().optional(),
+  customerAddress: z.string().optional(),
+  customerPincode: z.string().optional(),
 });
 
 export async function GET(req: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     await connectDB();
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") ?? "1");
@@ -38,6 +46,32 @@ export async function GET(req: NextRequest) {
     const filter: Record<string, unknown> = {};
     if (type) filter.type = type;
     if (status) filter.status = status;
+
+    // Role-based filtering
+    const userRole = session.user.role ?? "customer";
+
+    if (userRole === "delivery-partner") {
+      // Get delivery partner's assigned warehouse
+      try {
+        const user = (await User.findById(session.user.id).lean()) as any;
+        if (!user || !user.assignedWarehouse) {
+          // No warehouse assigned, show no orders
+          return NextResponse.json({ orders: [], total: 0, page, totalPages: 0 });
+        }
+
+        // Show only orders for their warehouse with status "processing" or beyond
+        filter.warehouse = user.assignedWarehouse;
+        filter.status = { $in: ["processing", "completed", "cancelled"] };
+        filter.deliveryStatus = { $in: ["assigned", "picked_up", "in_transit", "delivered"] };
+      } catch (err) {
+        console.error("Error fetching delivery partner user:", err);
+        return NextResponse.json({ error: "Failed to fetch user details" }, { status: 500 });
+      }
+    } else if (userRole === "customer") {
+      // Customers see only their own orders
+      filter.createdBy = session.user.id;
+    }
+    // Admin and Manager see all orders (no additional filter)
 
     const [orders, total] = await Promise.all([
       Order.find(filter)
@@ -52,7 +86,8 @@ export async function GET(req: NextRequest) {
     ]);
 
     return NextResponse.json({ orders, total, page, totalPages: Math.ceil(total / limit) });
-  } catch {
+  } catch (error) {
+    console.error("Error fetching orders:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
