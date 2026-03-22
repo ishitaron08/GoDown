@@ -14,6 +14,7 @@ import {
   User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RoleTheme } from "@/components/role-theme";
 
 export default function CustomerLayout({
   children,
@@ -30,34 +31,48 @@ export default function CustomerLayout({
   ];
 
   return (
+    <RoleTheme>
     <div className="min-h-screen bg-background">
       {/* Top navigation bar */}
-      <header className="sticky top-0 z-50 h-12 md:h-14 border-b border-border bg-white flex items-center px-3 md:px-6 gap-3 md:gap-6">
+      <header className="sticky top-0 z-50 h-16 border-b border-white/40 glass flex items-center px-6 gap-6">
         {/* Logo */}
-        <Link href="/catalog" className="flex items-center gap-2 shrink-0">
-          <Warehouse className="h-4 w-4 md:h-5 md:w-5 text-neon" strokeWidth={1.5} />
-          <span className="text-[13px] md:text-[15px] font-semibold tracking-tight hidden md:inline">
+        <Link href="/catalog" className="flex items-center gap-2.5 shrink-0">
+          <div className="h-8 w-8 rounded-lg flex items-center justify-center shadow-sm" style={{ background: 'var(--role-gradient)' }}>
+            <Warehouse className="h-4 w-4 text-white" strokeWidth={2} />
+          </div>
+          <span className="text-[15px] font-semibold tracking-tight">
             GoDown
           </span>
         </Link>
 
-        {/* Desktop Nav links */}
-        <nav className="hidden md:flex items-center gap-1 ml-4">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium transition-colors rounded-md",
-                pathname === item.href || (item.href !== "/catalog" && pathname.startsWith(item.href))
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-              )}
-            >
-              <item.icon className="h-3.5 w-3.5" strokeWidth={1.5} />
-              {item.name}
-            </Link>
-          ))}
+        {/* Nav links */}
+        <nav className="flex items-center gap-1 ml-4">
+          <Link
+            href="/catalog"
+            className={cn(
+              "flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium transition-all duration-200 rounded-full",
+              pathname === "/catalog"
+                ? "text-white shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-white/40"
+            )}
+            style={pathname === "/catalog" ? { background: 'hsl(var(--neon))' } : undefined}
+          >
+            <Package className="h-3.5 w-3.5" strokeWidth={1.5} />
+            Products
+          </Link>
+          <Link
+            href="/catalog/orders"
+            className={cn(
+              "flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium transition-all duration-200 rounded-full",
+              pathname.startsWith("/catalog/orders")
+                ? "text-white shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-white/40"
+            )}
+            style={pathname.startsWith("/catalog/orders") ? { background: 'hsl(var(--neon))' } : undefined}
+          >
+            <ClipboardList className="h-3.5 w-3.5" strokeWidth={1.5} />
+            My Orders
+          </Link>
         </nav>
 
         {/* Spacer */}
@@ -77,8 +92,8 @@ export default function CustomerLayout({
 
         {/* Desktop User Section */}
         {session?.user && (
-          <div className="hidden md:flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-secondary rounded-md">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3.5 py-2 bg-white/40 backdrop-blur-sm border border-white/40 rounded-full">
               <User className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.5} />
               <span className="text-[12px] font-medium">
                 {session.user.name}
@@ -86,7 +101,7 @@ export default function CustomerLayout({
             </div>
             <button
               onClick={() => signOut({ callbackUrl: "/auth/login" })}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 text-[12px] text-muted-foreground hover:text-foreground rounded-full hover:bg-white/40 transition-all duration-200"
             >
               <LogOut className="h-3.5 w-3.5" strokeWidth={1.5} />
               Sign Out
@@ -149,5 +164,6 @@ export default function CustomerLayout({
         {children}
       </main>
     </div>
+    </RoleTheme>
   );
 }

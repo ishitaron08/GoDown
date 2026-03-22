@@ -8,6 +8,7 @@ import { Product } from "@/models/Product";
 import { Warehouse } from "@/models/Warehouse";
 import { User } from "@/models/User";
 import { setOrderStatus } from "@/lib/redis-cache";
+import { autoAssignOrder } from "@/lib/auto-assign";
 void Product; void Warehouse; void User;
 
 export const dynamic = "force-dynamic";
@@ -42,6 +43,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
 /**
  * PATCH /api/orders/:id — update order/delivery status
+ * When approving (pending → processing), auto-assigns delivery partner
  */
 export async function PATCH(req: NextRequest, { params }: Params) {
   try {
@@ -82,6 +84,71 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       }
     }
 
+    // ── Auto-assign delivery on approval (pending → processing) ──
+    let autoAssignResult = null;
+    if (
+      body.status === "processing" &&
+      order.type === "outbound" &&
+      !order.deliveryPartner
+    ) {
+      // Try to auto-assign if customer has coordinates
+      if (order.customerCoordinates?.lat && order.customerCoordinates?.lng) {
+        try {
+          const result = await autoAssignOrder(
+            order.customerCoordinates.lat,
+            order.customerCoordinates.lng,
+            order.items.map((i: any) => ({ product: i.product.toString(), quantity: i.quantity }))
+          );
+          if (result) {
+            autoAssignResult = result;
+            if (result.warehouse) {
+              order.warehouse = result.warehouse._id;
+            }
+            if (result.deliveryPartner) {
+              order.deliveryPartner = result.deliveryPartner._id as any;
+              order.deliveryStatus = "assigned";
+              order.autoAssigned = true;
+              if (result.deliveryPartner.vehicle) {
+                order.deliveryVehicle = result.deliveryPartner.vehicle.vehicleNumber;
+                // Mark vehicle as unavailable
+                await Supplier.updateOne(
+                  { _id: result.deliveryPartner._id, "vehicles.vehicleNumber": result.deliveryPartner.vehicle.vehicleNumber },
+                  { $set: { "vehicles.$.isAvailable": false } }
+                );
+              }
+            }
+            order.deliveryAddress = order.customerAddress;
+          }
+        } catch (err) {
+          console.error("Auto-assign on approve failed:", err);
+          // Non-blocking — order still gets approved even if auto-assign fails
+        }
+      } else {
+        // No coordinates — try geocoding the address for auto-assign
+        // For now, just assign to nearest delivery partner without geo
+        try {
+          const partners = await Supplier.find({ isActive: true }).lean() as any[];
+          for (const p of partners) {
+            const availableVehicle = p.vehicles?.find((v: any) => v.isAvailable);
+            if (availableVehicle) {
+              order.deliveryPartner = p._id;
+              order.deliveryStatus = "assigned";
+              order.deliveryVehicle = availableVehicle.vehicleNumber;
+              order.autoAssigned = true;
+              order.deliveryAddress = order.customerAddress;
+              await Supplier.updateOne(
+                { _id: p._id, "vehicles.vehicleNumber": availableVehicle.vehicleNumber },
+                { $set: { "vehicles.$.isAvailable": false } }
+              );
+              break;
+            }
+          }
+        } catch (err) {
+          console.error("Fallback partner assign failed:", err);
+        }
+      }
+    }
+
     await order.save();
 
     // Push to Redis so SSE picks it up
@@ -90,7 +157,16 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       deliveryStatus: order.deliveryStatus,
     });
 
-    return NextResponse.json(order);
+    // Populate for response
+    const populated = await Order.findById(params.id)
+      .populate("items.product", "name sku unit price")
+      .populate("supplier", "name")
+      .populate("warehouse", "name code city")
+      .populate("deliveryPartner", "name phone vehicles")
+      .populate("createdBy", "name")
+      .lean();
+
+    return NextResponse.json({ ...populated, autoAssignResult });
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

@@ -77,8 +77,8 @@ function StatCard({
             <p className="text-[11px] md:text-[12px] text-muted-foreground">{subtitle}</p>
           )}
         </div>
-        <div className="h-9 w-9 md:h-10 md:w-10 flex items-center justify-center bg-secondary shrink-0">
-          <Icon className="h-[16px] w-[16px] md:h-[18px] md:w-[18px] text-foreground/60" strokeWidth={1.5} />
+        <div className="h-10 w-10 flex items-center justify-center rounded-xl" style={{ background: 'hsl(var(--neon) / 0.08)' }}>
+          <Icon className="h-[18px] w-[18px]" style={{ color: 'hsl(var(--neon))' }} strokeWidth={1.5} />
         </div>
       </div>
     </div>
@@ -172,7 +172,7 @@ export default function DashboardPage() {
   if (!stats)
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4 animate-fade-in">
-        <div className="h-12 w-12 flex items-center justify-center bg-secondary">
+        <div className="h-12 w-12 flex items-center justify-center bg-secondary rounded-xl">
           <Warehouse className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
         </div>
         <p className="text-sm text-muted-foreground">Failed to load dashboard data.</p>
@@ -197,8 +197,8 @@ export default function DashboardPage() {
 
       {/* Live Pulse */}
       {live && (
-        <div className="surface p-3 md:p-4 border-l-2 border-emerald-500">
-          <div className="flex items-center gap-2 mb-2 md:mb-3">
+        <div className="surface p-5">
+          <div className="flex items-center gap-2 mb-3">
             {liveConnected && (
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -209,30 +209,30 @@ export default function DashboardPage() {
               Live Pulse
             </span>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-            <div className="flex items-center gap-2 p-2 md:p-2.5 bg-secondary/50">
-              <Activity className="h-3.5 w-3.5 md:h-4 md:w-4 text-blue-500 shrink-0" strokeWidth={1.5} />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="flex items-center gap-2.5 p-3 bg-blue-50/60 rounded-xl">
+              <Activity className="h-4 w-4 text-blue-500 shrink-0" strokeWidth={1.5} />
               <div>
                 <p className="text-base md:text-[18px] font-semibold tabular-nums leading-none">{live.ordersProcessing + live.ordersInTransit}</p>
                 <p className="text-[9px] md:text-[10px] text-muted-foreground mt-0.5">Active</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 p-2 md:p-2.5 bg-secondary/50">
-              <Users className="h-3.5 w-3.5 md:h-4 md:w-4 text-emerald-500 shrink-0" strokeWidth={1.5} />
+            <div className="flex items-center gap-2.5 p-3 bg-emerald-50/60 rounded-xl">
+              <Users className="h-4 w-4 text-emerald-500 shrink-0" strokeWidth={1.5} />
               <div>
                 <p className="text-base md:text-[18px] font-semibold tabular-nums leading-none">{live.partnersOnline}<span className="text-[9px] md:text-[11px] font-normal text-muted-foreground">/{live.partnersTotal}</span></p>
                 <p className="text-[9px] md:text-[10px] text-muted-foreground mt-0.5">Online</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 p-2 md:p-2.5 bg-secondary/50">
-              <Warehouse className="h-3.5 w-3.5 md:h-4 md:w-4 text-amber-500 shrink-0" strokeWidth={1.5} />
+            <div className="flex items-center gap-2.5 p-3 bg-amber-50/60 rounded-xl">
+              <Warehouse className="h-4 w-4 text-amber-500 shrink-0" strokeWidth={1.5} />
               <div>
                 <p className="text-base md:text-[18px] font-semibold tabular-nums leading-none">{live.staleWarehouses}</p>
                 <p className="text-[9px] md:text-[10px] text-muted-foreground mt-0.5">Stale</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 p-2 md:p-2.5 bg-secondary/50">
-              <DollarSign className="h-3.5 w-3.5 md:h-4 md:w-4 text-violet-500 shrink-0" strokeWidth={1.5} />
+            <div className="flex items-center gap-2.5 p-3 bg-violet-50/60 rounded-xl">
+              <DollarSign className="h-4 w-4 text-violet-500 shrink-0" strokeWidth={1.5} />
               <div>
                 <p className="text-base md:text-[18px] font-semibold tabular-nums leading-none">{formatCurrency(live.todayRevenue)}</p>
                 <p className="text-[9px] md:text-[10px] text-muted-foreground mt-0.5">Revenue</p>
@@ -288,36 +288,37 @@ export default function DashboardPage() {
                 margin={{ top: 4, right: 4, bottom: 0, left: -8 }}
               >
                 <CartesianGrid
-                  strokeDasharray="none"
-                  stroke="hsl(0 0% 93%)"
+                  strokeDasharray="3 3"
+                  stroke="hsl(220 13% 91%)"
                   vertical={false}
                 />
                 <XAxis
                   dataKey="status"
-                  tick={{ fontSize: 11, fill: "hsl(0 0% 45%)" }}
-                  axisLine={{ stroke: "hsl(0 0% 90%)" }}
+                  tick={{ fontSize: 11, fill: "hsl(215 16% 47%)" }}
+                  axisLine={{ stroke: "hsl(220 13% 91%)" }}
                   tickLine={false}
                 />
                 <YAxis
-                  tick={{ fontSize: 11, fill: "hsl(0 0% 45%)" }}
+                  tick={{ fontSize: 11, fill: "hsl(215 16% 47%)" }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <Tooltip
                   contentStyle={{
-                    background: "hsl(0 0% 3.9%)",
+                    background: "hsl(222 47% 11%)",
                     border: "none",
-                    borderRadius: 0,
+                    borderRadius: 10,
                     color: "white",
                     fontSize: 12,
-                    padding: "8px 12px",
+                    padding: "8px 14px",
+                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.2)",
                   }}
-                  cursor={{ fill: "hsl(0 0% 96%)" }}
+                  cursor={{ fill: "hsl(220 14% 94% / 0.5)" }}
                 />
                 <Bar
                   dataKey="count"
-                  fill="hsl(0 0% 12%)"
-                  radius={0}
+                  fill="hsl(222 47% 20%)"
+                  radius={[6, 6, 0, 0]}
                   maxBarSize={40}
                 />
               </BarChart>
@@ -332,7 +333,7 @@ export default function DashboardPage() {
           </h2>
           {stats.lowStockProducts.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-40 gap-3">
-              <div className="h-10 w-10 flex items-center justify-center bg-secondary">
+              <div className="h-10 w-10 flex items-center justify-center bg-secondary rounded-xl">
                 <Package className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
               </div>
               <p className="text-[12px] text-muted-foreground">
@@ -378,7 +379,7 @@ export default function DashboardPage() {
 
       {/* Recent Movements */}
       <div className="surface overflow-hidden">
-        <div className="px-3 md:px-6 py-3 md:py-4 border-b border-black/[0.06]">
+        <div className="px-6 py-4 border-b border-border">
           <h2 className="text-[13px] font-semibold tracking-tight">
             Recent Stock Movements
           </h2>
@@ -386,8 +387,8 @@ export default function DashboardPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead>
-              <tr className="border-b border-black/[0.04]">
-                <th className="text-left px-3 md:px-6 py-2 md:py-3 text-[10px] md:text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              <tr className="border-b border-border/60 bg-secondary/30">
+                <th className="text-left px-6 py-3 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
                   Product
                 </th>
                 <th className="text-left px-3 md:px-6 py-2 md:py-3 text-[10px] md:text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
@@ -418,7 +419,7 @@ export default function DashboardPage() {
                 stats.recentMovements.map((m) => (
                   <tr
                     key={m._id}
-                    className="border-t border-black/[0.03] hover:bg-secondary/50 transition-colors"
+                    className="border-t border-border/40 hover:bg-secondary/30 transition-colors"
                   >
                     <td className="px-3 md:px-6 py-2 md:py-3 font-medium text-[12px] md:text-[13px]">
                       {m.product?.name ?? "—"}
