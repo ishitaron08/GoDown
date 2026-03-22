@@ -1,6 +1,8 @@
 ﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import axios from "axios";
 import { toast } from "sonner";
 import {
@@ -79,6 +81,21 @@ const STATUS_TRANSITIONS: Record<string, Transition[]> = {
 };
 
 export default function OrdersPage() {
+  const router = useRouter();
+  const { data: session } = useSession();
+
+  // Redirect delivery partners to deliveries page
+  useEffect(() => {
+    if (session?.user?.role === "delivery-partner") {
+      router.replace("/deliveries");
+    }
+  }, [session, router]);
+
+  // If delivery partner, don't render the orders page
+  if (session?.user?.role === "delivery-partner") {
+    return null;
+  }
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -105,6 +122,31 @@ export default function OrdersPage() {
       setLoading(false);
     }
   }, [page, typeFilter, statusFilter]);
+
+  const handleApprove = async (orderId: string) => {
+    setApprovingId(orderId);
+    try {
+      await axios.patch(`/api/orders/${orderId}`, { status: "processing" });
+      toast.success("Order approved!");
+      fetchOrders();
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Failed to approve order");
+    } finally {
+      setApprovingId(null);
+    }
+  };
+
+  const handleViewDetails = async (orderId: string) => {
+    setLoadingDetails(true);
+    try {
+      const res = await axios.get(`/api/orders/${orderId}`);
+      setSelectedOrder(res.data);
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Failed to load order details");
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
 
   useEffect(() => {
     fetchOrders();
@@ -254,7 +296,7 @@ export default function OrdersPage() {
               <tbody>
                 {orders.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-16 text-center">
+                    <td colSpan={9} className="py-16 text-center">
                       <div className="flex flex-col items-center gap-3">
                         <div className="h-12 w-12 flex items-center justify-center bg-secondary">
                           <ClipboardList className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />

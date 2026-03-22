@@ -98,18 +98,29 @@ export const authOptions: NextAuthOptions = {
 
         await connectDB();
 
+        // 🔒 SECURITY: Only database-verified users can login
         const user = await User.findOne({
           email: credentials.email.toLowerCase(),
           isActive: true,
         }).select("+password");
 
-        if (!user) return null;
+        // ❌ User does not exist in database
+        if (!user) {
+          console.warn(`[AUTH] Login attempt for non-existent user: ${credentials.email.toLowerCase()}`);
+          return null;
+        }
 
+        // ✓ Verify password with bcrypt
         const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) return null;
+        if (!isValid) {
+          console.warn(`[AUTH] Invalid password for user: ${credentials.email.toLowerCase()}`);
+          return null;
+        }
 
-        // Look up the role's permissions (with fallback if roles not seeded yet)
+        // ✓ Look up the role's permissions (with fallback if roles not seeded yet)
         const permissions = await getPermissionsForRole(user.role);
+
+        console.info(`[AUTH] Successful login: ${user.email} (${user.role})`);
 
         return {
           id: user._id.toString(),

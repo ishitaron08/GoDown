@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Loader2, Warehouse } from "lucide-react";
+import { Loader2, Warehouse, Copy, Check } from "lucide-react";
 
 const LoginSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -20,12 +20,24 @@ const labelCls =
 const inputCls =
   "w-full px-4 py-3 border border-white/50 bg-white/50 backdrop-blur-sm text-[13px] rounded-lg placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-white/70 focus:bg-white/70 transition-all";
 
+// Demo credentials for testing
+const DEMO_CREDENTIALS = [
+  { name: "Admin Demo", email: "admin@godown.com", role: "👑 Admin" },
+  { name: "Manager Demo", email: "manager@godown.com", role: "📊 Manager" },
+  { name: "Staff Member", email: "staff@godown.com", role: "👥 Staff" },
+  { name: "Customer Demo", email: "customer@godown.com", role: "🛍️ Customer" },
+  { name: "Delivery Partner", email: "delivery@godown.com", role: "🚚 Delivery" },
+];
+const DEMO_PASSWORD = "demo@2026";
+
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
+  const [copyStates, setCopyStates] = useState<Record<string, boolean>>({});
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginForm>({ resolver: zodResolver(LoginSchema) });
 
@@ -50,6 +62,20 @@ export default function LoginPage() {
     // the cookie is flushed before the navigation on Vercel / production HTTPS.
     // We go to /dashboard; the middleware will redirect customers to /catalog.
     window.location.href = "/dashboard";
+  };
+
+  // Copy email to clipboard
+  const copyCredential = async (email: string) => {
+    try {
+      await navigator.clipboard.writeText(email);
+      setCopyStates({ ...copyStates, [email]: true });
+      toast.success(`✅ Copied: ${email}`);
+      setTimeout(() => {
+        setCopyStates({ ...copyStates, [email]: false });
+      }, 2000);
+    } catch (err) {
+      toast.error("Failed to copy");
+    }
   };
 
   return (
@@ -88,20 +114,24 @@ export default function LoginPage() {
             )}
           </div>
 
-          <div>
-            <label className={labelCls}>Password</label>
-            <input
-              {...register("password")}
-              type="password"
-              placeholder="••••••••"
-              className={inputCls}
-            />
-            {errors.password && (
-              <p className="mt-1 text-[11px] text-destructive">
-                {errors.password.message}
-              </p>
-            )}
+          <div className="p-4 bg-amber-50 border border-amber-200 animate-scale-in" style={{ animationDelay: "150ms" }}>
+            <p className="text-[11px] font-medium text-amber-900 mb-2">
+              🔑 Password for all accounts:
+            </p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 px-2 py-1.5 bg-white border border-amber-200 text-[11px] font-mono text-amber-900">
+                {DEMO_PASSWORD}
+              </code>
+              <button
+                onClick={() => navigator.clipboard.writeText(DEMO_PASSWORD)}
+                className="p-1.5 hover:bg-amber-100 transition-colors"
+              >
+                <Copy className="h-4 w-4 text-amber-700" />
+              </button>
+            </div>
           </div>
+        </div>
+      </div>
 
           <button
             type="submit"

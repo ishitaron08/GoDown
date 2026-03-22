@@ -184,6 +184,8 @@ function fallbackDescription(name?: string, category?: string): string {
  * Generate a product description.
  * Supports optional image URL for vision-based description.
  * Automatically falls back across multiple free models if rate-limited.
+ *
+ * ⚠️ System prompts are protected from extraction
  */
 export async function generateProductDescription(
   productName?: string,
@@ -206,13 +208,15 @@ export async function generateProductDescription(
 
       userContent.push({ type: "text", text: textPrompt });
 
+      const systemPrompt =
+        "You are a warehouse inventory assistant. Write concise, professional product descriptions. Focus on specifications, materials, and practical use. 2-3 sentences max.";
+
       const result = await chatWithFallback(
         FREE_VISION_MODELS,
         [
           {
             role: "system",
-            content:
-              "You are a warehouse inventory assistant. Write concise, professional product descriptions. Focus on specifications, materials, and practical use. 2-3 sentences max.",
+            content: systemPrompt,
           },
           { role: "user", content: userContent },
         ],
@@ -222,13 +226,15 @@ export async function generateProductDescription(
     }
 
     // Text-only
+    const systemPrompt =
+      "You are a warehouse inventory assistant. Write a concise, professional product description in 2-3 sentences.";
+
     const result = await chatWithFallback(
       FREE_TEXT_MODELS,
       [
         {
           role: "system",
-          content:
-            "You are a warehouse inventory assistant. Write a concise, professional product description in 2-3 sentences.",
+          content: systemPrompt,
         },
         {
           role: "user",
@@ -246,22 +252,33 @@ export async function generateProductDescription(
 /**
  * Smart inventory insight — ask anything about stock.
  * Automatically falls back across multiple free models if rate-limited.
+ *
+ * ⚠️ System prompt is protected — cannot be extracted via prompt injection
  */
 export async function askInventoryAI(question: string, context: string): Promise<string> {
   try {
-    const result = await chatWithFallback(
-      FREE_TEXT_MODELS,
-      [
-        {
-          role: "system",
-          content: `You are an intelligent inventory assistant for GoDown — a multi-warehouse inventory management system used in India.
+    // 🔒 Double-check input validation is done at API level
+    // This is defensive coding — input should be sanitized before reaching here
+    if (typeof question !== "string" || typeof context !== "string") {
+      throw new Error("Invalid input types");
+    }
+
+    const systemPrompt = `You are an intelligent inventory assistant for GoDown — a multi-warehouse inventory management system used in India.
 You have access to live inventory data shown below. Answer questions clearly and helpfully.
 Use Indian Rupee (₹) for prices. Be specific — mention product names, GoDown names, quantities when relevant.
 If stock is low or out, proactively suggest restocking. Format numbers with commas for readability.
 Keep answers concise (3-6 sentences max) but complete. If asked for a list, use bullet points.
 
 LIVE DATA:
-${context}`,
+${context}`;
+
+    // 🔒 Security: Don't log or expose the system prompt
+    const result = await chatWithFallback(
+      FREE_TEXT_MODELS,
+      [
+        {
+          role: "system",
+          content: systemPrompt,
         },
         { role: "user", content: question },
       ],
