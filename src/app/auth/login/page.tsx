@@ -125,13 +125,12 @@ export default function LoginPage() {
               <button
                 onClick={() => navigator.clipboard.writeText(DEMO_PASSWORD)}
                 className="p-1.5 hover:bg-amber-100 transition-colors"
+                type="button"
               >
                 <Copy className="h-4 w-4 text-amber-700" />
               </button>
             </div>
           </div>
-        </div>
-      </div>
 
           <button
             type="submit"
