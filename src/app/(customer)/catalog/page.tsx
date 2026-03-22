@@ -90,15 +90,15 @@ export default function CatalogPage() {
       </div>
 
       {/* Search + Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
         <form onSubmit={handleSearch} className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search products by name, SKU..."
-            className="w-full pl-10 pr-4 py-2.5 border border-border bg-white text-[13px] placeholder:text-muted-foreground/50 focus:outline-none focus:border-foreground/20 transition-colors"
+            placeholder="Search products..."
+            className="w-full pl-10 pr-4 py-2.5 md:py-3 border border-border bg-white text-[13px] md:text-[14px] placeholder:text-muted-foreground/50 focus:outline-none focus:border-foreground/20 transition-colors"
           />
           {search && (
             <button
@@ -106,17 +106,17 @@ export default function CatalogPage() {
               onClick={() => { setSearch(""); setPage(1); }}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-4 w-4" />
             </button>
           )}
         </form>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 md:gap-2.5">
           <Filter className="h-4 w-4 text-muted-foreground shrink-0" strokeWidth={1.5} />
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-3 py-2.5 border border-border bg-white text-[13px] focus:outline-none focus:border-foreground/20 transition-colors min-w-[160px]"
+            className="px-3 md:px-4 py-2.5 md:py-3 border border-border bg-white text-[13px] md:text-[14px] focus:outline-none focus:border-foreground/20 transition-colors min-w-[140px] md:min-w-[160px]"
           >
             <option value="">All Categories</option>
             {categories.map((c) => (
@@ -127,7 +127,7 @@ export default function CatalogPage() {
       </div>
 
       {/* Results count */}
-      <p className="text-[12px] text-muted-foreground">
+      <p className="text-[11px] md:text-[12px] text-muted-foreground">
         {total} product{total !== 1 ? "s" : ""} found
         {selectedCategory && ` in ${categories.find(c => c._id === selectedCategory)?.name}`}
         {search && ` matching "${search}"`}
@@ -145,7 +145,7 @@ export default function CatalogPage() {
           <p className="text-[12px] text-muted-foreground/60 mt-1">Try adjusting your search or filters</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 md:gap-4">
           {products.map((product) => (
             <button
               key={product._id}
@@ -160,46 +160,40 @@ export default function CatalogPage() {
                     alt={product.name}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <Package className="h-12 w-12 text-muted-foreground/20" strokeWidth={1} />
+                    <Package className="h-10 w-10 md:h-12 md:w-12 text-muted-foreground/20" strokeWidth={1} />
                   </div>
-                )}
-                {/* Multiple images badge */}
-                {product.images && product.images.length > 1 && (
-                  <span className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
-                    +{product.images.length - 1}
-                  </span>
                 )}
                 {/* Stock badge */}
                 {product.totalStock === 0 && (
-                  <span className="absolute top-2 left-2 bg-destructive text-white text-[10px] font-medium px-2 py-0.5">
+                  <span className="absolute top-1 md:top-2 left-1 md:left-2 bg-destructive text-white text-[8px] md:text-[10px] font-medium px-1.5 md:px-2 py-0.5">
                     Out of Stock
                   </span>
                 )}
               </div>
 
               {/* Info */}
-              <div className="p-4 space-y-1.5">
+              <div className="p-3 md:p-4 space-y-1 md:space-y-1.5">
                 {product.category && (
-                  <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                  <p className="text-[10px] md:text-[10px] font-medium uppercase tracking-wider text-muted-foreground line-clamp-1">
                     {product.category.name}
                   </p>
                 )}
-                <h3 className="text-[14px] font-medium leading-snug line-clamp-2 group-hover:text-foreground/80 transition-colors">
+                <h3 className="text-[13px] md:text-[14px] font-medium leading-snug line-clamp-2 group-hover:text-foreground/80 transition-colors">
                   {product.name}
                 </h3>
-                <div className="flex items-center justify-between pt-1">
-                  <span className="text-[16px] font-semibold">
+                <div className="flex items-center justify-between gap-1 pt-1 md:pt-1">
+                  <span className="text-[15px] md:text-[16px] font-semibold">
                     ₹{product.price.toLocaleString("en-IN")}
                   </span>
-                  <span className="text-[11px] text-muted-foreground">
+                  <span className="text-[10px] md:text-[11px] text-muted-foreground text-right">
                     per {product.unit}
                   </span>
                 </div>
-                <p className={`text-[11px] font-medium ${product.totalStock > 0 ? "text-emerald-600" : "text-destructive"}`}>
+                <p className={`text-[10px] md:text-[11px] font-medium ${product.totalStock > 0 ? "text-emerald-600" : "text-destructive"}`}>
                   {product.totalStock > 0 ? `${product.totalStock} in stock` : "Out of stock"}
                 </p>
               </div>
@@ -210,24 +204,24 @@ export default function CatalogPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-4">
+        <div className="flex items-center justify-center gap-2 md:gap-3 pt-4 md:pt-6">
           <button
             onClick={() => setPage(Math.max(1, page - 1))}
             disabled={page === 1}
-            className="flex items-center gap-1 px-3 py-2 text-[12px] border border-border hover:bg-secondary disabled:opacity-40 transition-colors"
+            className="flex items-center gap-1 px-2.5 md:px-3 py-2 md:py-2.5 text-[11px] md:text-[12px] border border-border hover:bg-secondary disabled:opacity-40 transition-colors"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
-            Previous
+            <span className="hidden sm:inline">Previous</span>
           </button>
-          <span className="text-[12px] text-muted-foreground px-3">
-            Page {page} of {totalPages}
+          <span className="text-[11px] md:text-[12px] text-muted-foreground px-2 md:px-3">
+            Page {page}/{totalPages}
           </span>
           <button
             onClick={() => setPage(Math.min(totalPages, page + 1))}
             disabled={page === totalPages}
-            className="flex items-center gap-1 px-3 py-2 text-[12px] border border-border hover:bg-secondary disabled:opacity-40 transition-colors"
+            className="flex items-center gap-1 px-2.5 md:px-3 py-2 md:py-2.5 text-[11px] md:text-[12px] border border-border hover:bg-secondary disabled:opacity-40 transition-colors"
           >
-            Next
+            <span className="hidden sm:inline">Next</span>
             <ChevronRight className="h-3.5 w-3.5" />
           </button>
         </div>
