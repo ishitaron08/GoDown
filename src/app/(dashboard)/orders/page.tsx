@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import axios from "axios";
 import { toast } from "sonner";
 import {
@@ -26,6 +28,18 @@ interface Order {
 }
 
 export default function OrdersPage() {
+  const router = useRouter();
+  const { data: session } = useSession();
+
+  // Redirect delivery partners away from admin orders view
+  useEffect(() => {
+    if (session?.user?.role === "delivery-partner") {
+      router.push("/deliveries");
+    } else if (session?.user?.role === "customer") {
+      router.push("/catalog/orders");
+    }
+  }, [session, router]);
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);

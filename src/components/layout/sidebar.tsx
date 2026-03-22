@@ -30,6 +30,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, permission: "dashboard:view" },
   { href: "/products", label: "Products", icon: Package, permission: "products:view" },
   { href: "/orders", label: "Orders", icon: ClipboardList, permission: "orders:view" },
+  { href: "/deliveries", label: "My Deliveries", icon: Truck, permission: "deliveries:view" },
   { href: "/suppliers", label: "Delivery Partners", icon: Truck, permission: "suppliers:view" },
   { href: "/reports", label: "Reports", icon: BarChart3, permission: "reports:view" },
   { href: "/ai", label: "AI Assistant", icon: Bot, permission: "ai:view" },
@@ -156,27 +157,29 @@ export function Sidebar() {
             <p className="px-3 mb-3 text-[10px] font-medium uppercase tracking-[0.12em] text-sidebar-foreground">
               Admin
             </p>
-            {visibleAdmin.map(({ href, label, icon: Icon }) => {
-              const active =
-                href === "/settings"
-                  ? pathname === "/settings"
-                  : pathname === href || pathname.startsWith(href + "/");
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 text-[13px] font-medium transition-all duration-150 border-l-2",
-                    active
-                      ? "border-neon bg-sidebar-accent text-white"
-                      : "border-transparent text-sidebar-foreground hover:text-white hover:bg-white/[0.04]"
-                  )}
-                >
-                  <Icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
-                  {label}
-                </Link>
-              );
-            })}
+            <div className="space-y-px">
+              {visibleAdmin.map(({ href, label, icon: Icon }) => {
+                const active =
+                  href === "/settings"
+                    ? pathname === "/settings"
+                    : pathname === href || pathname.startsWith(href + "/");
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 text-[13px] font-medium transition-all duration-150 border-l-2",
+                      active
+                        ? "border-neon bg-sidebar-accent text-white"
+                        : "border-transparent text-sidebar-foreground hover:text-white hover:bg-white/[0.04]"
+                    )}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" strokeWidth={1.5} />
+                    {label}
+                  </Link>
+                );
+              })}
+            </div>
           </>
         )}
         {/* Quick Links */}

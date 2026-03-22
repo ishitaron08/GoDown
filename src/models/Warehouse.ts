@@ -11,6 +11,7 @@ export interface IWarehouse extends Document {
     lng: number;
   };
   manager: Types.ObjectId; // ref User — the store manager
+  deliveryPartners?: Types.ObjectId[]; // ref User — delivery partners assigned to this warehouse
   phone?: string;
   isActive: boolean;
   createdAt: Date;
@@ -29,6 +30,7 @@ const WarehouseSchema = new Schema<IWarehouse>(
       lng: { type: Number, required: true },
     },
     manager: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    deliveryPartners: { type: [Schema.Types.ObjectId], ref: "User", default: [] },
     phone: { type: String },
     isActive: { type: Boolean, default: true },
   },

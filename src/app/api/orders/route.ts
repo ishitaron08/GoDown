@@ -29,6 +29,9 @@ const CreateOrderSchema = z.object({
 export async function GET(req: NextRequest) {
   try {
     await connectDB();
+    const session = await getServerSession(authOptions);
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") ?? "1");
     const limit = parseInt(searchParams.get("limit") ?? "20");
@@ -39,11 +42,33 @@ export async function GET(req: NextRequest) {
     if (type) filter.type = type;
     if (status) filter.status = status;
 
+    // Get user to check role and warehouse assignment
+    const user = await User.findById(session.user.id);
+    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
+    // Apply role-based filtering
+    if (user.role === "delivery-partner") {
+      // Delivery partners only see orders for their assigned warehouse
+      if (user.assignedWarehouse) {
+        filter.warehouse = user.assignedWarehouse;
+      }
+      // Only processing/completed/cancelled (not pending)
+      filter.status = { $in: ["processing", "completed", "cancelled"] };
+      // Only assigned or beyond
+      filter.deliveryStatus = { $in: ["assigned", "picked_up", "in_transit", "delivered"] };
+    } else if (user.role === "customer") {
+      // Customers only see their own orders
+      filter.createdBy = session.user.id;
+    }
+    // Admin/Manager: no filter (see all orders)
+
     const [orders, total] = await Promise.all([
       Order.find(filter)
         .populate("supplier", "name")
         .populate("items.product", "name sku unit")
         .populate("createdBy", "name")
+        .populate("warehouse", "name code city")
+        .populate("deliveryPartner", "name phone")
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)

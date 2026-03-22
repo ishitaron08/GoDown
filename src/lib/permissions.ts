@@ -25,6 +25,10 @@ export const ALL_PERMISSIONS = [
   "orders:edit",
   "orders:delete",
 
+  // Deliveries (delivery partner dashboard)
+  "deliveries:view",
+  "deliveries:edit",
+
   // Suppliers
   "suppliers:view",
   "suppliers:create",
@@ -114,6 +118,14 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       { key: "orders:create", label: "Create Orders" },
       { key: "orders:edit", label: "Edit Orders" },
       { key: "orders:delete", label: "Delete Orders" },
+    ],
+  },
+  {
+    module: "deliveries",
+    label: "Deliveries",
+    permissions: [
+      { key: "deliveries:view", label: "View Deliveries" },
+      { key: "deliveries:edit", label: "Update Delivery Status" },
     ],
   },
   {
@@ -291,8 +303,8 @@ export const DEFAULT_ROLES = {
     description: "Handles deliveries — view assigned orders with addresses, update delivery status",
     permissions: [
       "dashboard:view",
-      "orders:view",
-      "orders:edit",
+      "deliveries:view",
+      "deliveries:edit",
       "suppliers:view",
       "warehouses:view",
     ] as string[],
@@ -309,6 +321,7 @@ export const ROUTE_PERMISSIONS: Record<string, Permission> = {
   "/products/new": "products:create",
   "/inventory": "inventory:view",
   "/orders": "orders:view",
+  "/deliveries": "deliveries:view",
   "/suppliers": "suppliers:view",
   "/warehouses": "warehouses:view",
   "/reports": "reports:view",
